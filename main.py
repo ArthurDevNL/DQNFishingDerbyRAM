@@ -51,9 +51,9 @@ e = 1.0 if not test else 0.1
 e_decay_frames = 1000000
 e_min = 0.1
 
-gamma = 0.95
+gamma = 0.99
 
-update_freq = 10
+update_freq = 20
 counter = 0
 
 replay_mem_size = 50000
@@ -91,9 +91,9 @@ while True:
 			total_catch_value += reward
 
 		reward = max(0, reward)
-		if reward == 0:
-			reward = -0.01
-		#
+		# if reward == 0:
+		# 	reward = -0.01
+		# #
 		# if reward > 0:
 		# 	reward *= 2
 
