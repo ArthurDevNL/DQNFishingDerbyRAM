@@ -56,7 +56,7 @@ gamma = 0.95
 update_freq = 1
 counter = 0
 
-replay_mem_size = 50000
+replay_mem_size = 100000
 
 episode = 0
 # for episode in range(1000):
