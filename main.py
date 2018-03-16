@@ -19,8 +19,8 @@ load_model = test
 observation = env.reset()
 state_size = observation.shape[0]
 
-actions = [2,3,4,5]
-n_actions = 4 #env.action_space.n
+actions = [0,1,2,3,4,5]
+n_actions = 6 #env.action_space.n
 
 # Initialize dataset D
 D = deque(maxlen=100000)
@@ -66,7 +66,7 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		#env.render()
+		# env.render()
 
 		if test:
 			sleep(0.01)
@@ -86,7 +86,7 @@ while True:
 				print(action)
 
 		# Take the chosen action
-		observation_, reward, done, info = env.step(action + 2)
+		observation_, reward, done, info = env.step(action)
 		if reward > 0:
 			total_catch_value += reward
 

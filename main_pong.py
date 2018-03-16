@@ -21,9 +21,8 @@ m = {0:0, 1:3, 2:4}
 observation = env.reset()
 state_size = observation.shape[0]
 
-
-actions = [0,1,2]
-n_actions = 3 #env.action_space.n
+actions = [0,1,2,3]
+n_actions = 4 #env.action_space.n
 
 # Initialize dataset D
 D = deque(maxlen=100000)
@@ -68,6 +67,7 @@ while True:
 		state = phi(observation)
 
 		# Take a random action fraction e (epsilon) of the time
+
 		action = None
 		if np.random.rand() <= e or counter < replay_mem_size:
 			action = np.random.choice(range(n_actions))
