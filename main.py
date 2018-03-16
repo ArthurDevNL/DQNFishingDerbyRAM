@@ -53,7 +53,7 @@ e_min = 0.1
 
 gamma = 0.95
 
-update_freq = 1
+update_freq = 10
 counter = 0
 
 replay_mem_size = 50000
@@ -129,7 +129,7 @@ while True:
 
 		if e > e_min and counter > replay_mem_size:
 			e -= (1.0 - e_min) / e_decay_frames
-			e = max(e_min, 0.1)
+			e = max(e_min, e)
 
 	print('Finished episode', episode, total_catch_value, counter, e)
 
