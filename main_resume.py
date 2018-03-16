@@ -13,8 +13,8 @@ env.seed(42)
 # outdir = 'monitor/results'
 # env = wrappers.Monitor(env, directory=outdir, force=True)
 
-test = False
-load_model = test
+# test = False
+load_model = True
 
 observation = env.reset()
 state_size = observation.shape[0]
@@ -54,9 +54,9 @@ e_min = 0.1
 gamma = 0.95
 
 update_freq = 1
-counter = 0
+counter = 1004875
 
-replay_mem_size = 50000
+replay_mem_size = 100000
 
 episode = 0
 # for episode in range(1000):
@@ -129,14 +129,22 @@ while True:
 
 		if e > e_min and counter > replay_mem_size:
 			e -= (1.0 - e_min) / e_decay_frames
-			e = max(e_min, 0.1)
 
 	print('Finished episode', episode, total_catch_value, counter, e)
 
-	if episode % 20 == 0:
+	if episode % 100 == 0:
 		model_json = model.to_json()
 		with open("model.json", "w") as json_file:
 			json_file.write(model_json)
 		model.save_weights("model.h5")
 
 	episode += 1
+
+
+model_json = model.to_json()
+with open("model.json", "w") as json_file:
+	json_file.write(model_json)
+model.save_weights("model.h5")
+
+
+env.close()
