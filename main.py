@@ -49,12 +49,11 @@ def phi(x):
 
 e = 1.0 if not test else 0.1
 e_decay_frames = 1000000
-# e_decay = 0.995
-e_min = 0.05
+e_min = 0.1
 
 gamma = 0.95
 
-update_freq = 10
+update_freq = 1
 counter = 0
 
 replay_mem_size = 50000
