@@ -22,6 +22,8 @@ state_size = observation.shape[0]
 actions = [0,1,2,3,4,5]
 n_actions = 6 #env.action_space.n
 
+print(env.unwrapped.get_action_meanings())
+
 # Initialize dataset D
 D = deque(maxlen=100000)
 
@@ -88,8 +90,8 @@ while True:
 			total_catch_value += reward
 
 		reward = max(0, reward)
-		# if reward == 0:
-		# 	reward = -0.01
+		if reward == 0:
+			reward = -0.001
 		# #
 		# if reward > 0:
 		# 	reward *= 2
