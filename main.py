@@ -1,11 +1,11 @@
 import gym
 from keras.models import Sequential, model_from_json
 from keras.optimizers import RMSprop
-from keras.layers import Dense, Dropout
+from keras.layers import Dense, Dropout, Flatten
 from collections import deque
 import numpy as np
 from time import sleep
-env = gym.make('FishingDerby-ram-v0')
+env = gym.make('FishingDerby-ram-v4')
 env.seed(42)
 
 # Logging and monitoring
@@ -25,24 +25,19 @@ n_actions = 6 #env.action_space.n
 # Initialize dataset D
 D = deque(maxlen=100000)
 
+hist_size = 4
+
 # Initialize value function
 model = Sequential()
-model.add(Dense(128, input_dim=state_size, activation='relu'))
+model.add(Flatten(input_shape=(hist_size, state_size)))
+model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(n_actions))
 
-opt = RMSprop(lr=0.0001)
+opt = RMSprop(lr=0.00025, rho=0.95, epsilon=0.01)
 model.compile(loss='mse', optimizer=opt)
-
-if load_model:
-	json_file = open('model.json', 'r')
-	loaded_model_json = json_file.read()
-	json_file.close()
-	model = model_from_json(loaded_model_json)
-	model.load_weights("model.h5")
-	model.compile(loss='mse', optimizer='adam')
 
 def phi(x):
 	return x / 255.0
@@ -53,25 +48,27 @@ e_min = 0.1
 
 gamma = 0.99
 
-update_freq = 20
+update_freq = 4
 counter = 0
 
 replay_mem_size = 50000
 
 episode = 0
-# for episode in range(1000):
+
+history = deque(maxlen=hist_size)
 while True:
 	observation = env.reset()
 
 	total_catch_value = 0
 	done = False
 	while not done:
-		# env.render()
+		env.render()
 
 		if test:
 			sleep(0.01)
 
 		state = phi(observation)
+		history.append(state)
 
 		# Take a random action fraction e (epsilon) of the time
 		action = None
@@ -79,7 +76,7 @@ while True:
 			action = np.random.choice(range(n_actions))
 			# action = env.action_space.sample()
 		else:
-			q_values = model.predict(state.reshape(1,state_size))
+			q_values = model.predict(np.array(history).reshape(1, hist_size, state_size))
 			action = q_values[0].argsort()[-1]
 
 			if test:
@@ -99,7 +96,8 @@ while True:
 
 		# Store the tuple
 		state_ = phi(observation_)
-		D.append((state, action, reward, state_, done))
+		if len(history) == 4:
+			D.append((np.array(history).reshape(hist_size, state_size), action, reward, state_, done))
 
 		observation = observation_
 
@@ -115,15 +113,16 @@ while True:
 
 				y = r
 				if not d:
-					y = r + gamma * np.amax(model.predict(s_.reshape(1,state_size))[0])
+					s_ = np.concatenate([s,s_.reshape(1,128)], axis=0)[1:].reshape(1, hist_size, state_size)
+					y = r + gamma * np.amax(model.predict(s_)[0])
 
-				target_f = model.predict(s.reshape(1,state_size))
+				target_f = model.predict(s.reshape(1, hist_size,state_size))
 				target_f[0][a] = y
 				ys.append(target_f)
 				X.append(s)
 
 			X = np.array(X)
-			model.fit(X, np.array(ys).reshape(32, 4), epochs=1, verbose=0)
+			model.fit(X, np.array(ys).reshape(32, n_actions), epochs=1, verbose=0)
 
 		counter += 1
 
