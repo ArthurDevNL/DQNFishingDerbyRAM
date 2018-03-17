@@ -13,7 +13,7 @@ env.seed(42)
 # outdir = 'monitor/results'
 # env = wrappers.Monitor(env, directory=outdir, force=True)
 
-test = False
+test = True
 load_model = test
 
 m = {0:0, 1:3, 2:4}
@@ -35,13 +35,19 @@ model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(n_actions))
 
+if load_model:
+	json_file = open('model_breakout.json', 'r')
+	loaded_model_json = json_file.read()
+	json_file.close()
+	model = model_from_json(loaded_model_json)
+
 opt = RMSprop(lr=0.0002)
 model.compile(loss='mse', optimizer=opt)
 
 def phi(x):
 	return x / 255.0
 
-e = 1.0 if not test else 0.1
+e = 1.0 if not test else 0.05
 e_decay_frames = 1000000
 e_min = 0.1
 
@@ -59,7 +65,7 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		# env.render()
+		env.render()
 
 		if test:
 			sleep(0.01)
@@ -75,9 +81,6 @@ while True:
 		else:
 			q_values = model.predict(state.reshape(1,state_size))
 			action = q_values[0].argsort()[-1]
-
-			if test:
-				print(action)
 
 		# Take the chosen action
 		observation_, reward, done, info = env.step(action)
@@ -127,7 +130,7 @@ while True:
 
 	print('Finished episode', episode, total_catch_value, counter, e)
 
-	if episode % 20 == 0:
+	if episode % 20 == 0 and not test:
 		model_json = model.to_json()
 		with open("model_breakout.json", "w") as json_file:
 			json_file.write(model_json)
