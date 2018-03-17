@@ -62,7 +62,7 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		env.render()
+		# env.render()
 
 		if test:
 			sleep(0.01)
