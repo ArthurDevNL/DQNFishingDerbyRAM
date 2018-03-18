@@ -5,7 +5,7 @@ from keras.layers import Dense, Dropout, Flatten
 from collections import deque
 import numpy as np
 from time import sleep
-env = gym.make('FishingDerby-ram-v4')
+env = gym.make('Breakout-ram-v4')
 env.seed(42)
 
 # Logging and monitoring
@@ -19,8 +19,8 @@ load_model = test
 observation = env.reset()
 state_size = observation.shape[0]
 
-actions = [0,1,2,3,4,5]
-n_actions = 6 #env.action_space.n
+actions = [0,1,2,3]#,3,4,5]
+n_actions = 4 #env.action_space.n
 
 print(env.unwrapped.get_action_meanings())
 
@@ -32,7 +32,7 @@ hist_size = 4
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(hist_size, state_size)))
-model.add(Dense(128, activation='relu'))
+model.add(Dense(256, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
@@ -89,9 +89,9 @@ while True:
 		if reward > 0:
 			total_catch_value += reward
 
-		reward = max(0, reward)
-		if reward == 0:
-			reward = -0.001
+		# reward = max(0, reward)
+		# if reward == 0:
+		# 	reward = -0.001
 		# #
 		# if reward > 0:
 		# 	reward *= 2
