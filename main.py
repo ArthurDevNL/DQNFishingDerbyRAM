@@ -50,8 +50,8 @@ gamma = 0.99
 update_freq = 4
 counter = 0
 
-# replay_mem_size = 50000
-replay_mem_size = 1000
+replay_mem_size = 50000
+# replay_mem_size = 1000
 batch_size = 32
 
 episode = 0
@@ -61,7 +61,7 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		env.render()
+		# env.render()
 
 		if test:
 			sleep(0.01)
