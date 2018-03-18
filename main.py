@@ -139,10 +139,10 @@ while True:
 
 	print('Finished episode', episode, total_catch_value, counter, e)
 
-	# if episode % 20 == 0:
-	# 	model_json = model.to_json()
-	# 	with open("model.json", "w") as json_file:
-	# 		json_file.write(model_json)
-	# 	model.save_weights("model.h5")
+	if episode % 20 == 0:
+		model_json = model.to_json()
+		with open("model.json", "w") as json_file:
+			json_file.write(model_json)
+		model.save_weights("model.h5")
 
 	episode += 1
