@@ -2,6 +2,7 @@ import gym
 from keras.models import Sequential, model_from_json
 from keras.optimizers import RMSprop
 from keras.layers import *
+from keras.utils import to_categorical
 from collections import deque
 from itertools import islice
 import numpy as np
@@ -16,24 +17,37 @@ def phi(x):
 	# Fishies swim between 18 and 133
 	fishes = [69, 70, 71, 72, 73, 74]
 	for f in fishes:
-		v = (x[f] - 18.0) / 133.0
-		features.append(v)
+		v = x[f] - 18.0
+		v = to_categorical(min(v, 115), 116)
+		features.extend(v)
 
 	# Shark swims between 19 and 105
 	shark_x = 75
-	features.append((x[shark_x] - 19.0) / 105.0)
+	v = x[shark_x] - 19.0
+	v = to_categorical(min(v, 86), 87)
+	features.extend(v)
 
 	# Rod x between 4 and 15
 	rod_x = 21
-	features.append((x[rod_x] - 4.0) / 15.0)
+	v = x[rod_x] - 4
+	v = to_categorical(min(v, 11), 12)
+	features.extend(v)
 
 	# Line x between 19 and 98
 	line_x = 32
-	features.append((x[line_x] - 19.0) / 98.0)
+	v = x[line_x] - 19
+	v = to_categorical(min(v, 79), 80)
+	features.extend(v)
 
 	# Line y between 200 and 252
 	line_y = 67
-	features.append((x[line_y] - 200.0) / 252.0)
+	v = x[line_y] - 200
+	v = to_categorical(min(v, 52), 53)
+	features.extend(v)
+
+	caught_fish_idx = 112
+	v = 0 if x[caught_fish_idx] == 0 else 1
+	features.append(v)
 
 	return np.array(features)
 
@@ -44,12 +58,14 @@ actions = [0,1,2,3,4,5]#,3,4,5]
 n_actions = 6 #env.action_space.n
 
 print(env.unwrapped.get_action_meanings())
+print('State size:', state_size)
 
 # Initialize value function
 model = Sequential()
-model.add(Dense(64, input_dim=state_size, activation='relu'))
-model.add(Dense(64, activation='relu'))
-model.add(Dense(64, activation='relu'))
+model.add(Dense(256, input_dim=state_size, activation='relu'))
+model.add(Dropout(0.3))
+model.add(Dense(256, activation='relu'))
+model.add(Dropout(0.3))
 model.add(Dense(n_actions))
 
 opt = RMSprop(lr=0.0001)
@@ -78,7 +94,7 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		# env.render()
+		env.render()
 
 		state = phi(observation)
 
@@ -97,7 +113,7 @@ while True:
 
 		reward = max(0, reward)
 		if reward == 0:
-			reward = -0.0001
+			reward = -0.01
 
 		# Store the tuple
 		state_ = phi(observation_)
