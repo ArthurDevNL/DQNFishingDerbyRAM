@@ -61,7 +61,7 @@ e = 1.0
 e_decay_frames = 200000
 e_min = 0.1
 
-gamma = 0.95
+gamma = 0.99
 
 update_freq = 4
 counter = 0
@@ -77,7 +77,7 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		env.render()
+		# env.render()
 
 		state = phi(observation)
 
@@ -94,9 +94,9 @@ while True:
 		if reward > 0:
 			total_catch_value += reward
 
-		# reward = max(0, reward)
-		# if reward == 0:
-		# 	reward = -0.01
+		reward = max(0, reward)
+		if reward == 0:
+			reward = -0.0001
 
 		# Store the tuple
 		state_ = phi(observation_)
