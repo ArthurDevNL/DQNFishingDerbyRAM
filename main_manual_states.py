@@ -49,16 +49,17 @@ print(env.unwrapped.get_action_meanings())
 model = Sequential()
 model.add(Dense(64, input_dim=state_size, activation='relu'))
 model.add(Dense(64, activation='relu'))
+model.add(Dense(64, activation='relu'))
 model.add(Dense(n_actions))
 
-opt = RMSprop(lr=0.0001, rho=0.95, epsilon=0.01)
+opt = RMSprop(lr=0.0001)
 model.compile(loss='mse', optimizer=opt)
 
 # Initialize dataset D
 D = deque(maxlen=100000)
 
 e = 1.0
-e_decay_frames = 200000
+e_decay_frames = 500000
 e_min = 0.1
 
 gamma = 0.99
@@ -66,7 +67,7 @@ gamma = 0.99
 update_freq = 4
 counter = 0
 
-replay_mem_size = 10000
+replay_mem_size = 20000
 # replay_mem_size = 1000
 batch_size = 32
 
