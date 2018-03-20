@@ -5,6 +5,7 @@ from keras.layers import *
 from keras.utils import to_categorical
 from collections import deque
 from itertools import islice
+import random
 import numpy as np
 from time import sleep
 env = gym.make('FishingDerby-ram-v4')
@@ -23,10 +24,14 @@ def phi(x):
 	max_x = 100
 
 	# Fishies swim between 18 and 133
-	fishes = [69, 70, 71, 72, 73, 74]
-	for f in fishes:
-		v = rescale(x[f], min_x, max_x)
-		features.append(v)
+	# fishes = [69, 70, 71, 72, 73, 74]
+	# for f in fishes:
+	# 	v = rescale(x[f], min_x, max_x)
+	# 	features.append(v)
+
+	# Just add the fish of value 6
+	v = rescale(x[70], min_x, max_x)
+	features.append(v)
 
 	# Shark swims between 19 and 105
 	shark_x = 75
@@ -44,7 +49,8 @@ def phi(x):
 	features.append(v)
 
 	caught_fish_idx = 112
-	v = rescale(x[caught_fish_idx], 0,6)
+	v = 0 if x[caught_fish_idx] == 0 else 1
+	# v = rescale(x[caught_fish_idx], 0,6)
 	features.append(v)
 
 	return np.array(features)
@@ -60,13 +66,13 @@ print('State size:', state_size)
 
 # Initialize value function
 model = Sequential()
-model.add(Dense(128, input_dim=state_size, activation='relu'))
+model.add(Dense(64, input_dim=state_size, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(128, activation='relu'))
-model.add(Dropout(0.5))
+# model.add(Dense(128, activation='relu'))
+# model.add(Dropout(0.5))
 model.add(Dense(n_actions))
 
-opt = RMSprop(lr=0.00001)
+opt = RMSprop(lr=0.000001)
 model.compile(loss='mse', optimizer=opt)
 
 # Initialize dataset D
@@ -114,7 +120,7 @@ while True:
 		# Take a random action fraction e (epsilon) of the time
 		action = None
 		if np.random.rand() <= e or counter < replay_mem_size:
-			action = np.random.choice(range(n_actions))
+			action = np.random.choice(range(n_actions), p=[0.15,0.05,0.20,0.19,0.19,0.22])
 		else:
 			q_values = model.predict(state.reshape(1,state_size))
 			action = q_values[0].argsort()[-1]
