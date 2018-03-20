@@ -66,13 +66,13 @@ print('State size:', state_size)
 
 # Initialize value function
 model = Sequential()
-model.add(Dense(64, input_dim=state_size, activation='relu'))
+model.add(Dense(32, input_dim=state_size, activation='relu'))
 model.add(Dropout(0.5))
 # model.add(Dense(128, activation='relu'))
 # model.add(Dropout(0.5))
 model.add(Dense(n_actions))
 
-opt = RMSprop(lr=0.000001)
+opt = RMSprop(lr=0.00001)
 model.compile(loss='mse', optimizer=opt)
 
 # Initialize dataset D
