@@ -71,7 +71,7 @@ model.add(Dense(64, activation='relu'))
 model.add(Dense(64, activation='relu'))
 model.add(Dense(n_actions))
 
-opt = RMSprop(lr=0.0001)
+opt = RMSprop(lr=0.00001)
 model.compile(loss='mse', optimizer=opt)
 
 # Initialize dataset D
