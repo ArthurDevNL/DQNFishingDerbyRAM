@@ -7,7 +7,7 @@ from collections import deque
 from itertools import islice
 import numpy as np
 from time import sleep
-env = gym.make('FishingDerby-ram-v0')
+env = gym.make('FishingDerby-ram-v4')
 env.seed(42)
 
 # mn = min, mx = max
@@ -60,10 +60,10 @@ print('State size:', state_size)
 
 # Initialize value function
 model = Sequential()
-model.add(Dense(32, input_dim=state_size, activation='relu'))
-model.add(Dropout(0.4))
-model.add(Dense(32, activation='relu'))
-model.add(Dropout(0.4))
+model.add(Dense(128, input_dim=state_size, activation='relu'))
+model.add(Dropout(0.5))
+# model.add(Dense(128, activation='relu'))
+# model.add(Dropout(0.4))
 model.add(Dense(n_actions))
 
 opt = RMSprop(lr=0.0001)
@@ -83,6 +83,22 @@ counter = 0
 
 replay_mem_size = 30000
 batch_size = 32
+
+pending_reward_idx = 114
+
+last_reward_frames = 0
+def get_reward(obs):
+	global last_reward_frames
+	if last_reward_frames > 0:
+		last_reward_frames -= 1
+		return 0
+
+	pending_reward = obs[pending_reward_idx]
+	if pending_reward > 0:
+		last_reward_frames = pending_reward + 1
+		return pending_reward + 1
+
+	return 0
 
 episode = 0
 while True:
@@ -108,9 +124,10 @@ while True:
 		if reward > 0:
 			total_catch_value += reward
 
-		reward = max(0, reward)
-		if reward == 0:
-			reward = -0.1
+		reward = get_reward(observation_)
+
+		# if reward == 0:
+		# 	reward = -0.01
 
 		# Store the tuple
 		state_ = phi(observation_)
@@ -155,3 +172,4 @@ while True:
 		model.save_weights("model.h5")
 
 	episode += 1
+
