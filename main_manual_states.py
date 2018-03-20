@@ -44,7 +44,7 @@ def phi(x):
 	features.append(v)
 
 	caught_fish_idx = 112
-	v = 0 if x[caught_fish_idx] == 0 else 1
+	v = rescale(x[caught_fish_idx], 0,6)
 	features.append(v)
 
 	return np.array(features)
