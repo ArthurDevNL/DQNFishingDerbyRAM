@@ -62,20 +62,20 @@ print('State size:', state_size)
 
 # Initialize value function
 model = Sequential()
-model.add(Dense(256, input_dim=state_size, activation='relu'))
-model.add(Dropout(0.3))
-model.add(Dense(256, activation='relu'))
-model.add(Dropout(0.3))
+model.add(Dense(512, input_dim=state_size, activation='relu'))
+model.add(Dropout(0.4))
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.4))
 model.add(Dense(n_actions))
 
 opt = RMSprop(lr=0.0001)
 model.compile(loss='mse', optimizer=opt)
 
 # Initialize dataset D
-D = deque(maxlen=100000)
+D = deque(maxlen=1000000)
 
 e = 1.0
-e_decay_frames = 500000
+e_decay_frames = 1000000
 e_min = 0.1
 
 gamma = 0.99
@@ -83,7 +83,7 @@ gamma = 0.99
 update_freq = 4
 counter = 0
 
-replay_mem_size = 20000
+replay_mem_size = 50000
 # replay_mem_size = 1000
 batch_size = 32
 
@@ -94,7 +94,7 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		env.render()
+		# env.render()
 
 		state = phi(observation)
 
