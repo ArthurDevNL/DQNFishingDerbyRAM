@@ -57,7 +57,7 @@ caught_fish_opp_idx = 114
 
 # Contains the number of the fish that was caught (6 to 1 from top to bottom)
 caught_fish_idx = 112
-pending_reward_idx = 113
+pending_reward_idx = 114
 
 last_b = False
 had_fish = False
@@ -75,8 +75,9 @@ while True:
 
 	r = np.subtract(observation, observation_)
 	print_ram(r)
-	print(observation[113]) #114
-	print_ram(observation_)
+	print(observation[114]) #114
+	print(observation[112])
+	print_ram(observation)
 
 	# plt.imshow(observation)
 	# plt.grid(True)
@@ -86,7 +87,11 @@ while True:
 	# 	print("RAAwwrrrr miam")
 	# 	input()
 
-	input()
+	# if observation_[65] > 0:
+	# 	input()
+
+	if observation[114] > 0:
+		input()
 	# if observation[caught_fish_idx]
 
 	# if observation[caught_fish_idx] > 0 or last_b:

@@ -62,11 +62,11 @@ print('State size:', state_size)
 model = Sequential()
 model.add(Dense(128, input_dim=state_size, activation='relu'))
 model.add(Dropout(0.5))
-# model.add(Dense(128, activation='relu'))
-# model.add(Dropout(0.4))
+model.add(Dense(128, activation='relu'))
+model.add(Dropout(0.5))
 model.add(Dense(n_actions))
 
-opt = RMSprop(lr=0.0001)
+opt = RMSprop(lr=0.00001)
 model.compile(loss='mse', optimizer=opt)
 
 # Initialize dataset D
@@ -107,7 +107,7 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		# env.render()
+		env.render()
 
 		state = phi(observation)
 
