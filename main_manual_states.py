@@ -18,35 +18,56 @@ def phi(x):
 	fishes = [69, 70, 71, 72, 73, 74]
 	for f in fishes:
 		v = x[f] - 18.0
-		v = to_categorical(min(v, 115), 116)
-		features.extend(v)
+		features.append(v)
+		# v = to_categorical(min(v, 115), 116)
+		# features.extend(v)
 
 	# Shark swims between 19 and 105
 	shark_x = 75
 	v = x[shark_x] - 19.0
-	v = to_categorical(min(v, 86), 87)
-	features.extend(v)
+	features.append(v)
+	# v = to_categorical(min(v, 86), 87)
+	# features.extend(v)
 
 	# Rod x between 4 and 15
 	rod_x = 21
 	v = x[rod_x] - 4
-	v = to_categorical(min(v, 11), 12)
-	features.extend(v)
+	features.append(v)
+	# v = to_categorical(min(v, 11), 12)
+	# features.extend(v)
 
 	# Line x between 19 and 98
 	line_x = 32
 	v = x[line_x] - 19
-	v = to_categorical(min(v, 79), 80)
-	features.extend(v)
+	features.append(v)
+	# v = to_categorical(min(v, 79), 80)
+	# features.extend(v)
 
 	# Line y between 200 and 252
 	line_y = 67
 	v = x[line_y] - 200
-	v = to_categorical(min(v, 52), 53)
-	features.extend(v)
+	features.append(v)
+	# v = to_categorical(min(v, 52), 53)
+	# features.extend(v)
+
+	opp_rod_x = 22
+	v = x[opp_rod_x] - 4
+	features.append(v)
+
+	opp_line_x = 33
+	v = x[opp_line_x] - 19
+	features.append(v)
+
+	opp_line_y = 68
+	v = x[opp_line_y] - 200
+	features.append(v)
 
 	caught_fish_idx = 112
 	v = 0 if x[caught_fish_idx] == 0 else 1
+	features.append(v)
+
+	opp_caught_fish_idx = 113
+	v = 0 if x[opp_caught_fish_idx] == 0 else 1
 	features.append(v)
 
 	return np.array(features)
@@ -62,20 +83,20 @@ print('State size:', state_size)
 
 # Initialize value function
 model = Sequential()
-model.add(Dense(512, input_dim=state_size, activation='relu'))
+model.add(Dense(64, input_dim=state_size, activation='relu'))
 model.add(Dropout(0.4))
-model.add(Dense(512, activation='relu'))
+model.add(Dense(64, activation='relu'))
 model.add(Dropout(0.4))
 model.add(Dense(n_actions))
 
-opt = RMSprop(lr=0.0001)
+opt = RMSprop(lr=0.00001)
 model.compile(loss='mse', optimizer=opt)
 
 # Initialize dataset D
-D = deque(maxlen=1000000)
+D = deque(maxlen=100000)
 
 e = 1.0
-e_decay_frames = 1000000
+e_decay_frames = 500000
 e_min = 0.1
 
 gamma = 0.99
@@ -94,7 +115,7 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		# env.render()
+		env.render()
 
 		state = phi(observation)
 
@@ -111,9 +132,9 @@ while True:
 		if reward > 0:
 			total_catch_value += reward
 
-		reward = max(0, reward)
-		if reward == 0:
-			reward = -0.01
+		# reward = max(0, reward)
+		# if reward == 0:
+		# 	reward = -0.01
 
 		# Store the tuple
 		state_ = phi(observation_)
