@@ -64,14 +64,24 @@ n_actions = 6 #env.action_space.n
 print(env.unwrapped.get_action_meanings())
 print('State size:', state_size)
 
+test = False
+load_model = False
+
 hist_size = 4
 
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(64, input_dim=state_size, activation='relu'))
-# model.add(Dense(64, activation='relu'))
+model.add(Dense(32, input_dim=state_size, activation='relu'))
+model.add(Dense(32, activation='relu'))
 model.add(Dense(n_actions))
+
+if load_model:
+	json_file = open('model.json', 'r')
+	loaded_model_json = json_file.read()
+	json_file.close()
+	model = model_from_json(loaded_model_json)
+	model.load_weights("model.h5")
 
 opt = RMSprop(lr=0.0001)
 model.compile(loss='mse', optimizer=opt)
@@ -79,16 +89,16 @@ model.compile(loss='mse', optimizer=opt)
 # Initialize dataset D
 D = deque(maxlen=100000)
 
-e = 1.0
-e_decay_frames = 1000000
+e = 1.0 if not test else 0.05
+e_decay_frames = 500000
 e_min = 0.1
 
 gamma = 0.99
 
-update_freq = 4
+update_freq = 1
 counter = 0
 
-replay_mem_size = 30000
+replay_mem_size = 50000
 batch_size = 32
 
 pending_reward_idx = 114
@@ -114,14 +124,15 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		env.render()
+		# env.render()
 
 		state = phi(observation)
 
 		# Take a random action fraction e (epsilon) of the time
 		action = None
-		if np.random.rand() <= e or counter < replay_mem_size:
+		if np.random.rand() <= e or counter < hist_size:
 			action = np.random.choice(range(n_actions), p=[0.15,0.05,0.20,0.19,0.19,0.22])
+			# action = np.random.choice(range(n_actions))
 		else:
 			sl = list(islice(D, len(D) - (hist_size - 1), len(D)))
 			prev_states = [x[0] for x in sl]
@@ -147,7 +158,7 @@ while True:
 		observation = observation_
 
 		# Train the Q function
-		if counter > replay_mem_size and counter % update_freq == 0 and len(D) > (batch_size + hist_size):
+		if counter > replay_mem_size and not test and counter % update_freq == 0 and len(D) > (batch_size + hist_size):
 			D_ = list(D)
 
 			# Train the model
@@ -186,7 +197,7 @@ while True:
 
 	print('Finished episode', episode, total_catch_value, counter, e)
 
-	if episode % 20 == 0:
+	if episode % 20 == 0 and not test:
 		model_json = model.to_json()
 		with open("model.json", "w") as json_file:
 			json_file.write(model_json)
