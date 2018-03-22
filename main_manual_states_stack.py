@@ -72,8 +72,8 @@ hist_size = 4
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(32, input_dim=state_size, activation='relu'))
-model.add(Dense(32, activation='relu'))
+model.add(Dense(128, input_dim=state_size, activation='relu'))
+model.add(Dense(128, activation='relu'))
 model.add(Dense(n_actions))
 
 if load_model:
@@ -90,7 +90,7 @@ model.compile(loss='mse', optimizer=opt)
 D = deque(maxlen=100000)
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 500000
+e_decay_frames = 300000
 e_min = 0.1
 
 gamma = 0.99
@@ -148,8 +148,8 @@ while True:
 
 		reward = get_reward(observation_)
 
-		if reward == 0:
-			reward = -0.001
+		# if reward == 0:
+		# 	reward = -0.0001
 
 		# Store the tuple
 		state_ = phi(observation_)
