@@ -45,8 +45,8 @@ def phi(x):
 
 	# Line y between 200 and 252
 	line_y = 67
-	v = max(x[line_y] - 200, 0)
-	one_hot = to_categorical(v, num_classes=53)
+	v = min(max(x[line_y] - 200, 0), 54)
+	one_hot = to_categorical(v, num_classes=55)
 	features.extend(one_hot)
 
 	caught_fish_idx = 112
