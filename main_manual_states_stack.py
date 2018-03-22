@@ -72,8 +72,8 @@ hist_size = 4
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(128, input_dim=state_size, activation='relu'))
-model.add(Dense(128, activation='relu'))
+model.add(Dense(64, input_dim=state_size, activation='relu'))
+model.add(Dense(64, activation='relu'))
 model.add(Dense(n_actions))
 
 if load_model:
@@ -148,8 +148,8 @@ while True:
 
 		reward = get_reward(observation_)
 
-		# if reward == 0:
-		# 	reward = -0.0001
+		if reward == 0:
+			reward = -0.0001
 
 		# Store the tuple
 		state_ = phi(observation_)
