@@ -1,4 +1,4 @@
-import gym
+kimport gym
 from keras.models import Sequential, model_from_json
 from keras.optimizers import RMSprop
 from keras.layers import *
@@ -45,8 +45,9 @@ def phi(x):
 
 	# Line y between 200 and 252
 	line_y = 67
-	v = rescale(x[line_y], 200, 252)
-	features.append(v)
+	v = max(x[line_y] - 200, 0)
+	one_hot = to_categorical(v, num_classes=53)
+	features.extend(one_hot)
 
 	caught_fish_idx = 112
 	v = 0 if x[caught_fish_idx] == 0 else 1
@@ -67,7 +68,7 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 4
+hist_size = 3
 
 # Initialize value function
 model = Sequential()
