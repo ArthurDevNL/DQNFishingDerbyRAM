@@ -30,18 +30,18 @@ def phi(x):
 	max_x = 100
 
 	# Just add the fish of value 6
-	v = one_hot(x[70], min_x, max_x)
-	features.extend(v)
+	v = rescale(x[70], min_x, max_x)
+	features.append(v)
 
 	# Shark swims between 19 and 105
 	shark_x = 75
-	v = one_hot(x[shark_x], min_x, max_x)
-	features.extend(v)
+	v = rescale(x[shark_x], min_x, max_x)
+	features.append(v)
 
 	# Line x between 19 and 98
 	line_x = 32
-	v = one_hot(x[line_x], min_x, max_x)
-	features.extend(v)
+	v = rescale(x[line_x], min_x, max_x)
+	features.append(v)
 
 	# Line y between 200 and 252
 	line_y = 67
@@ -49,9 +49,8 @@ def phi(x):
 	features.extend(v)
 
 	caught_fish_idx = 112
-	v = 0 if x[caught_fish_idx] == 0 else 1
-	# v = rescale(x[caught_fish_idx], 0,6)
-	features.append(v)
+	v = one_hot(x[caught_fish_idx], 0, 6, num_classes=7)
+	features.extend(v)
 
 	return np.array(features)
 
@@ -95,7 +94,7 @@ e_min = 0.1
 
 gamma = 0.99
 
-update_freq = 1
+update_freq = 2
 counter = 0
 
 replay_mem_size = 50000
@@ -132,8 +131,8 @@ while True:
 		if reward > 0:
 			total_catch_value += reward
 
-		if reward == 0:
-			reward = -0.0001
+		# Clip the reward
+		reward = max(0, reward)
 
 		# Store the tuple
 		state_ = phi(observation_)
@@ -168,6 +167,7 @@ while True:
 				# Calculate the target vector
 				target_f = model.predict(stack)
 				target_f[0][a] = y
+				target_f = np.clip(target_f, 0, 3)
 				ys.append(target_f)
 
 			X = np.array(X).reshape(batch_size, state_size, hist_size)
