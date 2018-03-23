@@ -1,4 +1,4 @@
-kimport gym
+import gym
 from keras.models import Sequential, model_from_json
 from keras.optimizers import RMSprop
 from keras.layers import *
@@ -16,6 +16,12 @@ def rescale(v, mn, mx):
 	v = min(v - mn, mx - mn)
 	return float(v / (mx - mn))
 
+def one_hot(x, mn, mx, num_classes=50):
+	x = max(x - mn, 0)
+	x = min(x, mx - mn)
+	x = int(round(x/num_classes))
+	return to_categorical(x, num_classes=num_classes)
+
 def phi(x):
 
 	features = []
@@ -23,31 +29,24 @@ def phi(x):
 	min_x = 18
 	max_x = 100
 
-	# Fishies swim between 18 and 133
-	# fishes = [69, 70, 71, 72, 73, 74]
-	# for f in fishes:
-	# 	v = rescale(x[f], min_x, max_x)
-	# 	features.append(v)
-
 	# Just add the fish of value 6
-	v = rescale(x[70], min_x, max_x)
-	features.append(v)
+	v = one_hot(x[70], min_x, max_x)
+	features.extend(v)
 
 	# Shark swims between 19 and 105
 	shark_x = 75
-	v = rescale(x[shark_x], min_x, max_x)
-	features.append(v)
+	v = one_hot(x[shark_x], min_x, max_x)
+	features.extend(v)
 
 	# Line x between 19 and 98
 	line_x = 32
-	v = rescale(x[line_x], min_x, max_x)
-	features.append(v)
+	v = one_hot(x[line_x], min_x, max_x)
+	features.extend(v)
 
 	# Line y between 200 and 252
 	line_y = 67
-	v = min(max(x[line_y] - 200, 0), 54)
-	one_hot = to_categorical(v, num_classes=55)
-	features.extend(one_hot)
+	v = one_hot(x[line_y], 200, 252)
+	features.extend(v)
 
 	caught_fish_idx = 112
 	v = 0 if x[caught_fish_idx] == 0 else 1
@@ -104,20 +103,6 @@ batch_size = 32
 
 pending_reward_idx = 114
 
-last_reward_frames = 0
-def get_reward(obs):
-	global last_reward_frames
-	if last_reward_frames > 0:
-		last_reward_frames -= 1
-		return 0
-
-	pending_reward = obs[pending_reward_idx]
-	if pending_reward > 0:
-		last_reward_frames = pending_reward + 1
-		return pending_reward + 1
-
-	return 0
-
 episode = 0
 while True:
 	observation = env.reset()
@@ -146,8 +131,6 @@ while True:
 		observation_, reward, done, info = env.step(actions[action])
 		if reward > 0:
 			total_catch_value += reward
-
-		reward = get_reward(observation_)
 
 		if reward == 0:
 			reward = -0.0001
