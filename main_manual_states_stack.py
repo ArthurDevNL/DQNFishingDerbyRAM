@@ -34,9 +34,9 @@ def phi(x):
 	# features.append(v)
 
 	# Shark swims between 19 and 105
-	# shark_x = 75
-	# v = rescale(x[shark_x], min_x, max_x)
-	# features.append(v)
+	shark_x = 75
+	v = one_hot(x[shark_x], 20, 120)
+	features.extend(v)
 
 	# Line x between 19 and 98
 	# line_x = 32
