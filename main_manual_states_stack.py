@@ -30,18 +30,18 @@ def phi(x):
 	max_x = 100
 
 	# Just add the fish of value 6
-	v = rescale(x[70], min_x, max_x)
-	features.append(v)
+	# v = rescale(x[70], min_x, max_x)
+	# features.append(v)
 
 	# Shark swims between 19 and 105
-	shark_x = 75
-	v = rescale(x[shark_x], min_x, max_x)
-	features.append(v)
+	# shark_x = 75
+	# v = rescale(x[shark_x], min_x, max_x)
+	# features.append(v)
 
 	# Line x between 19 and 98
-	line_x = 32
-	v = rescale(x[line_x], min_x, max_x)
-	features.append(v)
+	# line_x = 32
+	# v = rescale(x[line_x], min_x, max_x)
+	# features.append(v)
 
 	# Line y between 200 and 252
 	line_y = 67
@@ -66,7 +66,7 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 3
+hist_size = 2
 
 # Initialize value function
 model = Sequential()
@@ -101,6 +101,20 @@ replay_mem_size = 50000
 batch_size = 32
 
 pending_reward_idx = 114
+last_reward_frames = 0
+def get_reward(obs):
+	global last_reward_frames
+	if last_reward_frames > 0:
+		last_reward_frames -= 1
+		return 0
+
+	pending_reward = obs[pending_reward_idx]
+	if pending_reward > 0:
+		last_reward_frames = pending_reward + 1
+		return pending_reward + 1
+
+	return 0
+
 
 episode = 0
 while True:
@@ -132,7 +146,7 @@ while True:
 			total_catch_value += reward
 
 		# Clip the reward
-		reward = max(0, reward)
+		reward = get_reward(observation_)
 
 		# Store the tuple
 		state_ = phi(observation_)
