@@ -16,7 +16,7 @@ def rescale(v, mn, mx):
 	v = min(v - mn, mx - mn)
 	return float(v / (mx - mn))
 
-def one_hot(x, mn, mx, num_classes=50):
+def one_hot(x, mn, mx, num_classes=20):
 	x = max(x - mn, 0)
 	x = min(x, mx - mn)
 	x = int(round(x/num_classes))
@@ -30,8 +30,8 @@ def phi(x):
 	max_x = 100
 
 	# Just add the fish of value 6
-	# v = rescale(x[70], min_x, max_x)
-	# features.append(v)
+	v = one_hot(x[72], min_x, max_x)
+	features.extend(v)
 
 	# Shark swims between 19 and 105
 	shark_x = 75
@@ -39,13 +39,13 @@ def phi(x):
 	features.extend(v)
 
 	# Line x between 19 and 98
-	# line_x = 32
-	# v = rescale(x[line_x], min_x, max_x)
-	# features.append(v)
+	line_x = 32
+	v = one_hot(x[line_x], min_x, max_x)
+	features.extend(v)
 
 	# Line y between 200 and 252
 	line_y = 67
-	v = one_hot(x[line_y], 200, 252)
+	v = one_hot(x[line_y], 200, 252, num_classes=50)
 	features.extend(v)
 
 	caught_fish_idx = 112
@@ -66,13 +66,13 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 2
+hist_size = 3
 
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(64, input_dim=state_size, activation='relu'))
-model.add(Dense(64, activation='relu'))
+model.add(Dense(256, input_dim=state_size, activation='relu'))
+model.add(Dense(128, activation='relu'))
 model.add(Dense(n_actions))
 
 if load_model:
@@ -89,7 +89,7 @@ model.compile(loss='mse', optimizer=opt)
 D = deque(maxlen=100000)
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 300000
+e_decay_frames = 500000
 e_min = 0.1
 
 gamma = 0.99
@@ -130,7 +130,7 @@ while True:
 		# Take a random action fraction e (epsilon) of the time
 		action = None
 		if np.random.rand() <= e or counter < hist_size:
-			action = np.random.choice(range(n_actions), p=[0.15,0.05,0.20,0.19,0.19,0.22])
+			action = np.random.choice(range(n_actions), p=[0.10,0.05,0.22,0.19,0.19,0.25])
 			# action = np.random.choice(range(n_actions))
 		else:
 			sl = list(islice(D, len(D) - (hist_size - 1), len(D)))
@@ -145,7 +145,6 @@ while True:
 		if reward > 0:
 			total_catch_value += reward
 
-		# Clip the reward
 		reward = get_reward(observation_)
 
 		# Store the tuple
