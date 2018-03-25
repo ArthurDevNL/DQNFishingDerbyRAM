@@ -35,7 +35,7 @@ def phi(x):
 
 	# Shark swims between 19 and 105
 	shark_x = 75
-	v = one_hot(x[shark_x], 20, 120)
+	v = one_hot(x[shark_x], 20, 150)
 	features.extend(v)
 
 	# Line x between 19 and 98
@@ -45,7 +45,7 @@ def phi(x):
 
 	# Line y between 200 and 252
 	line_y = 67
-	v = one_hot(x[line_y], 200, 252, num_classes=50)
+	v = one_hot(x[line_y], 200, 252, num_classes=40)
 	features.extend(v)
 
 	caught_fish_idx = 112
@@ -71,8 +71,8 @@ hist_size = 3
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(256, input_dim=state_size, activation='relu'))
-model.add(Dense(128, activation='relu'))
+model.add(Dense(512, input_dim=state_size, activation='relu'))
+model.add(Dense(512, activation='relu'))
 model.add(Dense(n_actions))
 
 if load_model:
@@ -86,7 +86,7 @@ opt = RMSprop(lr=0.0001)
 model.compile(loss='mse', optimizer=opt)
 
 # Initialize dataset D
-D = deque(maxlen=100000)
+D = deque(maxlen=500000)
 
 e = 1.0 if not test else 0.05
 e_decay_frames = 500000
@@ -147,6 +147,9 @@ while True:
 
 		reward = get_reward(observation_)
 
+		if reward == 0:
+			reward = -0.02
+
 		# Store the tuple
 		state_ = phi(observation_)
 		D.append((state, action, reward, state_, done))
@@ -180,7 +183,7 @@ while True:
 				# Calculate the target vector
 				target_f = model.predict(stack)
 				target_f[0][a] = y
-				target_f = np.clip(target_f, 0, 3)
+				target_f = np.clip(target_f, 0, 8)
 				ys.append(target_f)
 
 			X = np.array(X).reshape(batch_size, state_size, hist_size)
