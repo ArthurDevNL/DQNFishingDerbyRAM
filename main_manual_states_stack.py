@@ -26,31 +26,29 @@ def phi(x):
 
 	features = []
 
-	min_x = 18
-	max_x = 100
+	line_x = int(x[32])
+	line_y = int(x[67])
 
-	# Just add the fish of value 6
-	v = one_hot(x[72], min_x, max_x)
-	features.extend(v)
+	fish4_top_x = int(x[72])
+	fish4_top_y = 230
 
-	# Shark swims between 19 and 105
-	shark_x = 75
-	v = one_hot(x[shark_x], 20, 150)
-	features.extend(v)
+	# Distance to fish 4
+	features.append(fish4_top_x - line_x)
+	features.append(fish4_top_y - line_y)
 
-	# Line x between 19 and 98
-	line_x = 32
-	v = one_hot(x[line_x], min_x, max_x)
-	features.extend(v)
+	fish6_x = int(x[70])
+	fish6_y = 245
+	features.append(fish6_x - line_x)
+	features.append(fish6_y - line_y)
 
-	# Line y between 200 and 252
-	line_y = 67
-	v = one_hot(x[line_y], 200, 252, num_classes=40)
-	features.extend(v)
+	shark_x = int(x[75])
+	shark_y = 213
+	features.append(shark_x - line_x)
+	features.append(shark_y - line_y)
 
 	caught_fish_idx = 112
-	v = one_hot(x[caught_fish_idx], 0, 6, num_classes=7)
-	features.extend(v)
+	v = 0 if x[caught_fish_idx] == 0 else 1
+	features.append(v)
 
 	return np.array(features)
 
@@ -71,8 +69,8 @@ hist_size = 3
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(512, input_dim=state_size, activation='relu'))
-model.add(Dense(512, activation='relu'))
+model.add(Dense(32, input_dim=state_size, activation='relu'))
+model.add(Dense(32, activation='relu'))
 model.add(Dense(n_actions))
 
 if load_model:
@@ -89,7 +87,7 @@ model.compile(loss='mse', optimizer=opt)
 D = deque(maxlen=500000)
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 500000
+e_decay_frames = 300000
 e_min = 0.1
 
 gamma = 0.99
@@ -148,7 +146,7 @@ while True:
 		reward = get_reward(observation_)
 
 		if reward == 0:
-			reward = -0.02
+			reward = -0.001
 
 		# Store the tuple
 		state_ = phi(observation_)
