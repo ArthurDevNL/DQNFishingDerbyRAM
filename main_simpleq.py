@@ -46,10 +46,10 @@ test = False
 load_model = False
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 500000
+e_decay_frames = 1000000
 e_min = 0.1
 
-gamma = 0.99
+gamma = 0.95
 
 counter = 0
 
@@ -104,8 +104,8 @@ while True:
 		# Take a random action fraction e (epsilon) of the time
 		action = None
 		if np.random.rand() <= e:
-			action = np.random.choice(range(n_actions), p=[0.10,0.05,0.22,0.19,0.19,0.25])
-			# action = np.random.choice(range(n_actions))
+			# action = np.random.choice(range(n_actions), p=[0.10,0.05,0.22,0.19,0.19,0.25])
+			action = np.random.choice(range(n_actions))
 		else:
 			q = [getQ(state, a) for a in actions]
 			maxQ = np.argmax(q)
@@ -118,8 +118,8 @@ while True:
 
 		reward = get_reward(observation_)
 
-		# if reward == 0:
-		# 	reward = -0.001
+		if reward == 0:
+			reward = -0.001
 
 		# Store the tuple
 		state_ = phi(observation_)
