@@ -46,7 +46,7 @@ test = False
 load_model = False
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 300000
+e_decay_frames = 500000
 e_min = 0.1
 
 gamma = 0.99
@@ -71,7 +71,7 @@ def get_reward(obs):
 
 Q = {}
 
-alpha = 0.2
+alpha = 0.1
 
 def getQ(s, a):
 	if (s,a) not in Q:
@@ -97,7 +97,7 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		env.render()
+		# env.render()
 
 		state = phi(observation)
 
@@ -118,8 +118,8 @@ while True:
 
 		reward = get_reward(observation_)
 
-		if reward == 0:
-			reward = -0.001
+		# if reward == 0:
+		# 	reward = -0.001
 
 		# Store the tuple
 		state_ = phi(observation_)
