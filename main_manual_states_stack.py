@@ -33,24 +33,21 @@ def phi(x):
 	fish4_top_y = 230
 
 	# Distance to fish 4
-	features.append(fish4_top_x - line_x)
-	features.append(fish4_top_y - line_y)
-
-	fish6_x = int(x[70])
-	fish6_y = 245
-	features.append(fish6_x - line_x)
-	features.append(fish6_y - line_y)
+	v1 = fish4_top_x - line_x
+	v1 = np.clip([v1], -20, 20)[0]
+	v2 = fish4_top_y - line_y
+	v2 = np.clip([v2], -20, 20)[0]
 
 	shark_x = int(x[75])
 	shark_y = 213
-	features.append(shark_x - line_x)
-	features.append(shark_y - line_y)
+	v3 = shark_x - line_x + 10
+	v3 = np.clip([v3], -20, 20)[0]
+	v4 = shark_y - line_y
+	v4 = np.clip([v4], -20, 20)[0]
 
 	caught_fish_idx = 112
-	v = 0 if x[caught_fish_idx] == 0 else 1
-	features.append(v)
-
-	return np.array(features)
+	v5 = 0 if x[caught_fish_idx] == 0 else 1
+	return np.array([v1, v2, v3, v4, v5])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -64,13 +61,13 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 3
+hist_size = 1
 
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(32, input_dim=state_size, activation='relu'))
-model.add(Dense(32, activation='relu'))
+model.add(Dense(16, input_dim=state_size, activation='relu'))
+model.add(Dense(16, activation='relu'))
 model.add(Dense(n_actions))
 
 if load_model:
@@ -80,7 +77,7 @@ if load_model:
 	model = model_from_json(loaded_model_json)
 	model.load_weights("model.h5")
 
-opt = RMSprop(lr=0.0001)
+opt = RMSprop(lr=0.001)
 model.compile(loss='mse', optimizer=opt)
 
 # Initialize dataset D
@@ -92,27 +89,31 @@ e_min = 0.1
 
 gamma = 0.99
 
-update_freq = 2
+update_freq = 8
 counter = 0
 
-replay_mem_size = 50000
+min_replay_mem_size = 50000
 batch_size = 32
 
 pending_reward_idx = 114
 last_reward_frames = 0
-def get_reward(obs):
+caught_fish_idx = 112
+def get_reward(obs, obs_):
+
+	if obs_[caught_fish_idx] == 0 and obs[caught_fish_idx] > 0 and obs_[pending_reward_idx] == 0:
+		return -10
+
 	global last_reward_frames
 	if last_reward_frames > 0:
 		last_reward_frames -= 1
 		return 0
 
-	pending_reward = obs[pending_reward_idx]
+	pending_reward = obs_[pending_reward_idx]
 	if pending_reward > 0:
 		last_reward_frames = pending_reward + 1
 		return pending_reward + 1
 
 	return 0
-
 
 episode = 0
 while True:
@@ -145,8 +146,8 @@ while True:
 
 		reward = get_reward(observation_)
 
-		if reward == 0:
-			reward = -0.001
+		# if reward == 0:
+		# 	reward = -0.001
 
 		# Store the tuple
 		state_ = phi(observation_)
@@ -155,7 +156,7 @@ while True:
 		observation = observation_
 
 		# Train the Q function
-		if counter > replay_mem_size and not test and counter % update_freq == 0 and len(D) > (batch_size + hist_size):
+		if counter > min_replay_mem_size and not test and counter % update_freq == 0 and len(D) > (batch_size + hist_size):
 			D_ = list(D)
 
 			# Train the model
@@ -181,7 +182,7 @@ while True:
 				# Calculate the target vector
 				target_f = model.predict(stack)
 				target_f[0][a] = y
-				target_f = np.clip(target_f, 0, 8)
+				target_f = np.clip(target_f, -10, 10)
 				ys.append(target_f)
 
 			X = np.array(X).reshape(batch_size, state_size, hist_size)
@@ -189,7 +190,7 @@ while True:
 
 		counter += 1
 
-		if e > e_min and counter > replay_mem_size:
+		if e > e_min and counter > min_replay_mem_size:
 			e -= (1.0 - e_min) / e_decay_frames
 			e = max(e_min, e)
 
