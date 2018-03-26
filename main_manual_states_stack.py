@@ -144,7 +144,7 @@ while True:
 		if reward > 0:
 			total_catch_value += reward
 
-		reward = get_reward(observation_)
+		reward = get_reward(observation, observation_)
 
 		# if reward == 0:
 		# 	reward = -0.001
