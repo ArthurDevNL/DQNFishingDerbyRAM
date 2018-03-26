@@ -146,8 +146,8 @@ while True:
 
 		reward = get_reward(observation, observation_)
 
-		# if reward == 0:
-		# 	reward = -0.001
+		if reward == 0:
+			reward = -0.01
 
 		# Store the tuple
 		state_ = phi(observation_)
