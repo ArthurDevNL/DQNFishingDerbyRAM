@@ -31,24 +31,29 @@ def phi(x):
 	line_y = int(x[67])
 
 	fish4_top_x = int(x[72])
-	fish4_top_y = 230
+	fish4_top_y = 245
 
 	# Distance to fish 4
-	v1 = fish4_top_x - line_x
+	v1 = line_x - fish4_top_x
 	v1 = np.clip([v1], -20, 20)[0]
+
 	v2 = fish4_top_y - line_y
 	v2 = np.clip([v2], -20, 20)[0]
+
+	fish6_top_x = int(x[70])
+	v6 = line_x - fish6_top_x
+	v6 = np.clip([v6], -20, 20)[0]
 
 	shark_x = int(x[75])
 	shark_y = 213
 	v3 = shark_x - line_x + 10
 	v3 = np.clip([v3], -20, 20)[0]
-	v4 = shark_y - line_y
+	v4 = line_y - shark_y
 	v4 = np.clip([v4], -20, 20)[0]
 
 	caught_fish_idx = 112
 	v5 = 0 if x[caught_fish_idx] == 0 else 1
-	return np.array([v1, v2, v3, v4, v5])
+	return np.array([v1, v6, v2, v3, v4, v5])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -62,12 +67,12 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 1
+hist_size = 2
 
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(10, activation='relu'))
+model.add(Dense(32, activation='relu'))
 model.add(Dense(n_actions))
 
 if load_model:
@@ -95,15 +100,15 @@ model.compile(loss=huber_loss, optimizer=opt)
 D = deque(maxlen=500000)
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 300000
+e_decay_frames = 100000
 e_min = 0.1
 
 gamma = 0.95
 
-update_freq = 4
+update_freq = 100
 counter = 0
 
-min_replay_mem_size = 50000
+min_replay_mem_size = 32
 batch_size = 32
 
 pending_reward_idx = 114
@@ -112,7 +117,7 @@ caught_fish_idx = 112
 def get_reward(obs, obs_):
 
 	if obs_[caught_fish_idx] == 0 and obs[caught_fish_idx] > 0 and obs_[pending_reward_idx] == 0:
-		return -0.5
+		return -1
 
 	global last_reward_frames
 	if last_reward_frames > 0:
@@ -133,14 +138,14 @@ while True:
 	total_catch_value = 0
 	done = False
 	while not done:
-		# env.render()
+		env.render()
 
 		state = phi(observation)
 
 		# Take a random action fraction e (epsilon) of the time
 		action = None
-		if np.random.rand() <= e or counter < hist_size:
-			action = np.random.choice(range(n_actions), p=[0.24,0.23,0.23,0.30])
+		if np.random.rand() < e or counter < hist_size:
+			action = np.random.choice(range(n_actions), p=[0.26,0.23,0.23,0.28])
 			# action = np.random.choice(range(n_actions))
 		else:
 			sl = list(islice(D, len(D) - (hist_size - 1), len(D)))
@@ -156,6 +161,9 @@ while True:
 			total_catch_value += reward
 
 		reward = get_reward(observation, observation_)
+
+		# if reward == 0:
+		# 	reward = -0.01
 
 		# Store the tuple
 		state_ = phi(observation_)
