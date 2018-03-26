@@ -100,7 +100,7 @@ caught_fish_idx = 112
 def get_reward(obs, obs_):
 
 	if obs_[caught_fish_idx] == 0 and obs[caught_fish_idx] > 0 and obs_[pending_reward_idx] == 0:
-		return -5
+		return -0.5
 
 	global last_reward_frames
 	if last_reward_frames > 0:
@@ -145,8 +145,8 @@ while True:
 
 		reward = get_reward(observation, observation_)
 
-		if reward == 0:
-			reward = -0.01
+		# if reward == 0:
+		# 	reward = -0.01
 
 		# Store the tuple
 		state_ = phi(observation_)
