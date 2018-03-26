@@ -2,6 +2,7 @@ import gym
 from keras.models import Sequential, model_from_json
 from keras.optimizers import RMSprop
 from keras.layers import *
+from keras import backend as K
 from keras.utils import to_categorical
 from collections import deque
 from itertools import islice
@@ -76,8 +77,19 @@ if load_model:
 	model = model_from_json(loaded_model_json)
 	model.load_weights("model.h5")
 
+# Note: pass in_keras=False to use this function with raw numbers of numpy arrays for testing
+def huber_loss(a, b, in_keras=True):
+	error = a - b
+	quadratic_term = error*error / 2
+	linear_term = abs(error) - 1/2
+	use_linear_term = (abs(error) > 1.0)
+	if in_keras:
+		# Keras won't let us multiply floats by booleans, so we explicitly cast the booleans to floats
+		use_linear_term = K.cast(use_linear_term, 'float32')
+	return use_linear_term * linear_term + (1-use_linear_term) * quadratic_term
+
 opt = RMSprop(lr=0.0001)
-model.compile(loss='mse', optimizer=opt)
+model.compile(loss=huber_loss, optimizer=opt)
 
 # Initialize dataset D
 D = deque(maxlen=500000)
@@ -144,9 +156,6 @@ while True:
 			total_catch_value += reward
 
 		reward = get_reward(observation, observation_)
-
-		# if reward == 0:
-		# 	reward = -0.01
 
 		# Store the tuple
 		state_ = phi(observation_)
