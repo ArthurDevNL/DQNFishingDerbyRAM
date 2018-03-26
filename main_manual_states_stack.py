@@ -52,8 +52,8 @@ def phi(x):
 observation = env.reset()
 state_size = phi(observation).shape[0]
 
-actions = [0,1,2,3,4,5]#,3,4,5]
-n_actions = 6 #env.action_space.n
+actions = [2,3,4,5]
+n_actions = 4 #env.action_space.n
 
 print(env.unwrapped.get_action_meanings())
 print('State size:', state_size)
@@ -66,8 +66,7 @@ hist_size = 1
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(16, input_dim=state_size, activation='relu'))
-model.add(Dense(16, activation='relu'))
+model.add(Dense(32, input_dim=state_size, activation='relu'))
 model.add(Dense(n_actions))
 
 if load_model:
@@ -77,7 +76,7 @@ if load_model:
 	model = model_from_json(loaded_model_json)
 	model.load_weights("model.h5")
 
-opt = RMSprop(lr=0.001)
+opt = RMSprop(lr=0.0001)
 model.compile(loss='mse', optimizer=opt)
 
 # Initialize dataset D
@@ -87,9 +86,9 @@ e = 1.0 if not test else 0.05
 e_decay_frames = 300000
 e_min = 0.1
 
-gamma = 0.99
+gamma = 0.95
 
-update_freq = 8
+update_freq = 4
 counter = 0
 
 min_replay_mem_size = 50000
@@ -101,7 +100,7 @@ caught_fish_idx = 112
 def get_reward(obs, obs_):
 
 	if obs_[caught_fish_idx] == 0 and obs[caught_fish_idx] > 0 and obs_[pending_reward_idx] == 0:
-		return -10
+		return -5
 
 	global last_reward_frames
 	if last_reward_frames > 0:
@@ -129,7 +128,7 @@ while True:
 		# Take a random action fraction e (epsilon) of the time
 		action = None
 		if np.random.rand() <= e or counter < hist_size:
-			action = np.random.choice(range(n_actions), p=[0.10,0.05,0.22,0.19,0.19,0.25])
+			action = np.random.choice(range(n_actions), p=[0.24,0.23,0.23,0.30])
 			# action = np.random.choice(range(n_actions))
 		else:
 			sl = list(islice(D, len(D) - (hist_size - 1), len(D)))
