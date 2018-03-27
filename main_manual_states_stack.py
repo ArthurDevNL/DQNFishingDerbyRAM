@@ -46,13 +46,12 @@ def phi(x):
 
 	# Distance to fish 4
 	xclip = 20
-	# v2 = line_x - fish2_top_x
+	v2 = line_x - fish2_top_x
 	# v2y = line_y - 217
-	# v3 = line_x - fish4_top_x
+	v3 = line_x - fish4_top_x
 	# v3y = line_y - 230
-
 	v4 = line_x - fish6_top_x
-	v4y = line_y - 245
+	# v4y = line_y - 245
 
 	# shark_x = int(x[75])
 	# shark_y = 213
@@ -62,7 +61,8 @@ def phi(x):
 
 	# caught_fish_idx = 112
 	# v0 = int(x[caught_fish_idx])
-	return np.array([v4, v4y])
+	v_dist_to_bot = 255 - line_y
+	return np.array([v2, v3, v4, v_dist_to_bot])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -121,7 +121,7 @@ update_freq = 32
 counter = 0
 
 min_replay_mem_size = 32
-batch_size = 32
+batch_size = 64
 
 pending_reward_idx = 114
 last_reward_frames = 0
