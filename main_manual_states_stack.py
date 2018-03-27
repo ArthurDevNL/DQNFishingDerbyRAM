@@ -33,7 +33,7 @@ def phi(x):
 	fish2_top_x = int(x[74])
 	fish4_top_x = int(x[72])
 	fish6_top_x = int(x[70])
-	fish4_top_y = 230
+	fish4_top_y = 245
 
 	# v1 = max(line_y - 207, 0) # or
 	v1 = fish4_top_y - line_y
