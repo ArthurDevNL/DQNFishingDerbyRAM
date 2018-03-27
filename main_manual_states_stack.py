@@ -36,7 +36,7 @@ def phi(x):
 
 	# v1 = max(line_y - 207, 0) # or
 	v1 = 210 - line_y
-	# v1_1 = max(245 - line_y, 0)
+	v1_1 = 245 - line_y
 
 	# Distance to fish 4
 	xclip = 20
@@ -54,7 +54,7 @@ def phi(x):
 
 	caught_fish_idx = 112
 	v0 = int(x[caught_fish_idx])
-	return np.array([v0, v1, v2, v3, v4, v5])
+	return np.array([v0, v1, v1_1, v2, v3, v4, v5])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -73,7 +73,6 @@ hist_size = 1
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dropout(0.3))
 model.add(Dense(n_actions))
 
 print(model.summary())
@@ -96,7 +95,7 @@ def huber_loss(a, b, in_keras=True):
 		use_linear_term = K.cast(use_linear_term, 'float32')
 	return use_linear_term * linear_term + (1-use_linear_term) * quadratic_term
 
-opt = RMSprop(lr=0.001)
+opt = RMSprop(lr=0.00025)
 model.compile(loss=huber_loss, optimizer=opt)
 
 # Initialize dataset D
@@ -106,7 +105,7 @@ e = 1.0 if not test else 0.05
 e_decay_frames = 200000
 e_min = 0.1
 
-gamma = 0.95
+gamma = 0.99
 
 update_freq = 32
 counter = 0
