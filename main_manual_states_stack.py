@@ -112,7 +112,7 @@ D = deque(maxlen=500000)
 
 e = 1.0 if not test else 0.05
 e_decay_frames = 200000
-e_min = 0.1
+e_min = 0.05
 
 gamma = 0.99
 
@@ -175,7 +175,7 @@ while True:
 		reward = get_reward(observation, observation_)
 
 		if reward == 0:
-			reward = -0.02
+			reward = -0.05
 
 		total_value += reward
 
