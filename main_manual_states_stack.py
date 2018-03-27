@@ -41,7 +41,7 @@ def phi(x):
 	fish6_top_x = int(x[70])
 
 	# v1 = max(line_y - 207, 0) # or
-	v1 = 210 - line_y
+	v1 = 245 - line_y
 	# v1_1 = 245 - line_y
 
 	# Distance to fish 4
