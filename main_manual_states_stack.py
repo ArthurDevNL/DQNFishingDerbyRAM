@@ -40,7 +40,7 @@ def phi(x):
 
 	# Distance to fish 4
 	xclip = 24
-	v2 = fish2_top_x - line_x
+	v2 = max(line_x - xclip, 0)
 	# v3 = max(0, fish4_top_x - xclip)
 	# v4 = max(0, fish6_top_x - xclip)
 
