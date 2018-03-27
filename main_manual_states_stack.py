@@ -35,25 +35,26 @@ def phi(x):
 	fish6_top_x = int(x[70])
 	fish4_top_y = 230
 
-	v1 = max(line_y - 207, 0) # or fish4_top_y - line_y
+	# v1 = max(line_y - 207, 0) # or
+	v1 = fish4_top_y - line_y
 	# v1_1 = max(245 - line_y, 0)
 
 	# Distance to fish 4
 	xclip = 24
-	v2 = max(0, fish2_top_x - xclip)
-	v3 = max(0, fish4_top_x - xclip)
-	v4 = max(0, fish6_top_x - xclip)
+	v2 = fish2_top_x - line_x
+	# v3 = max(0, fish4_top_x - xclip)
+	# v4 = max(0, fish6_top_x - xclip)
 
 	shark_x = int(x[75])
 	# shark_y = 213
-	v5 = abs(min(20 - shark_x, 0))
+	v5 = shark_x - line_x + 10
 
 	# v4 = shark_y - line_y
 	# v4 = np.clip([v4], -20, 20)[0]
 
 	caught_fish_idx = 112
 	v0 = int(x[caught_fish_idx])
-	return np.array([v0, v1, v2, v3, v4, v5])
+	return np.array([v0, v1, v2, v5])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -67,14 +68,16 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 4
+hist_size = 2
 
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(64, activation='relu'))
-model.add(Dense(64, activation='relu'))
+# model.add(Dense(64, activation='relu'))
+# model.add(Dense(64, activation='relu'))
 model.add(Dense(n_actions))
+
+print(model.summary())
 
 if load_model:
 	json_file = open('model.json', 'r')
@@ -137,6 +140,7 @@ while True:
 	observation = env.reset()
 
 	total_catch_value = 0
+	total_value = 0
 	done = False
 	while not done:
 		env.render()
@@ -165,6 +169,8 @@ while True:
 
 		# if reward == 0:
 		# 	reward = -0.01
+
+		total_value += reward
 
 		# Store the tuple
 		state_ = phi(observation_)
@@ -211,7 +217,7 @@ while True:
 			e -= (1.0 - e_min) / e_decay_frames
 			e = max(e_min, e)
 
-	print('Finished episode', episode, total_catch_value, counter, e)
+	print('Finished episode', episode, total_catch_value, total_value, counter, e)
 
 	if episode % 20 == 0 and not test:
 		model_json = model.to_json()
