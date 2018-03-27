@@ -46,34 +46,22 @@ def phi(x):
 
 	# Distance to fish 4
 	xclip = 20
-	# v2 = line_x - fish2_top_x
+	# v2 = fish2_top_x - line_x
 	# v2y = line_y - 217
-	# v3 = line_x - fish4_top_x
-	# v3y = line_y - 230
-	# v4 = line_x - fish6_top_x
-	# v4y = line_y - 245
+	v3 = fish4_top_x - line_x
+	v3y = line_y - 230
+	v4 = fish6_top_x - line_x
+	v4y = line_y - 245
 
-	clip = 10
-	x_dist = fish6_top_x - line_x
-
-	xleft = abs(x_dist) if x_dist < 0 else 0
-	xright = x_dist if x_dist > 0 else 0
-
-	y_dist = 245 - line_y
-	ytop = abs(y_dist) if y_dist < 0 else 0
-	ybot = y_dist if y_dist > 0 else 0
-
-	# shark_x = int(x[75])
+	shark_x = int(x[75])
 	# shark_y = 213
 	# v5 = shark_x - line_x + 5
 	# v4 = shark_y - line_y
 	# v4 = np.clip([v4], -20, 20)[0]
 
-	# caught_fish_idx = 112
-	# v0 = int(x[caught_fish_idx])
-
-	res = np.clip([xleft, xright, ytop, ybot], 0, 20)
-	return res
+	caught_fish_idx = 112
+	v0 = int(x[caught_fish_idx])
+	return np.array([v0, v3, v3y, v4, v4y])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -123,16 +111,16 @@ model.compile(loss=huber_loss, optimizer=opt)
 D = deque(maxlen=500000)
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 200000
+e_decay_frames = 300000
 e_min = 0.05
 
 gamma = 0.99
 
-update_freq = 32
+update_freq = 1
 counter = 0
 
-min_replay_mem_size = 32
-batch_size = 64
+min_replay_mem_size = 50000
+batch_size = 32
 
 pending_reward_idx = 114
 last_reward_frames = 0
@@ -170,6 +158,7 @@ while True:
 		action = None
 		if np.random.rand() < e or counter < hist_size:
 			action = np.random.choice(range(n_actions), p=[0.26,0.23,0.23,0.28])
+			# action = np.random.choice(range(n_actions), p=[0.48,0.52])
 			# action = np.random.choice(range(n_actions))
 		else:
 			sl = list(islice(D, len(D) - (hist_size - 1), len(D)))
@@ -187,7 +176,7 @@ while True:
 		reward = get_reward(observation, observation_)
 
 		if reward == 0:
-			reward = -0.05
+			reward = -0.02
 
 		total_value += reward
 
