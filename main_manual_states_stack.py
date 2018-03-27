@@ -42,7 +42,7 @@ def phi(x):
 	xclip = 20
 	v2 = max(line_x - xclip, 0)
 	# v3 = max(0, fish4_top_x - xclip)
-	v4 = fish6_top_x - line_x
+	# v4 = fish6_top_x - line_x
 
 	shark_x = int(x[75])
 	# shark_y = 213
@@ -53,13 +53,13 @@ def phi(x):
 
 	caught_fish_idx = 112
 	v0 = int(x[caught_fish_idx])
-	return np.array([v0, v1, v2, v4, v5])
+	return np.array([v0, v1, v2, v5])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
 
-actions = [2,3,4,5]
-n_actions = 4 #env.action_space.n
+actions = [2,5]
+n_actions = 2 #env.action_space.n
 
 print(env.unwrapped.get_action_meanings())
 print('State size:', state_size)
