@@ -53,7 +53,7 @@ def phi(x):
 
 	caught_fish_idx = 112
 	v0 = int(x[caught_fish_idx])
-	return np.array([v0, v1, v2, v5])
+	return np.array([v0, v1, v2])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
