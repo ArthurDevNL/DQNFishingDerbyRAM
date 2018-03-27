@@ -47,16 +47,15 @@ def phi(x):
 	# Distance to fish 4
 	xclip = 20
 	v2 = fish2_top_x - line_x
-	v2y = 217 - line_y
+	v2y = line_y - 217
 	v3 = fish4_top_x - line_x
-	v3y = 230 - line_y
+	v3y = line_y - 230
 	v4 = fish6_top_x - line_x
-	v4y = 245 - line_y
+	v4y = line_y - 245
 
 	shark_x = int(x[75])
 	# shark_y = 213
-	v5 = shark_x - line_x + 5
-
+	# v5 = shark_x - line_x + 5
 	# v4 = shark_y - line_y
 	# v4 = np.clip([v4], -20, 20)[0]
 
