@@ -67,7 +67,7 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 3
+hist_size = 1
 
 # Initialize value function
 model = Sequential()
@@ -94,7 +94,7 @@ def huber_loss(a, b, in_keras=True):
 		use_linear_term = K.cast(use_linear_term, 'float32')
 	return use_linear_term * linear_term + (1-use_linear_term) * quadratic_term
 
-opt = RMSprop(lr=0.0001)
+opt = RMSprop(lr=0.001)
 model.compile(loss=huber_loss, optimizer=opt)
 
 # Initialize dataset D
