@@ -67,7 +67,7 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 1
+hist_size = 3
 
 # Initialize value function
 model = Sequential()
