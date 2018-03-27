@@ -73,6 +73,7 @@ hist_size = 1
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
+model.add(Dense(8))
 model.add(Dense(n_actions))
 
 print(model.summary())
