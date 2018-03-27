@@ -46,7 +46,7 @@ def phi(x):
 
 	shark_x = int(x[75])
 	# shark_y = 213
-	v5 = max(shark_x - xclip, 0)
+	v5 = shark_x - line_x + 5
 
 	# v4 = shark_y - line_y
 	# v4 = np.clip([v4], -20, 20)[0]
@@ -67,13 +67,11 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 2
+hist_size = 1
 
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-# model.add(Dense(64, activation='relu'))
-# model.add(Dense(64, activation='relu'))
 model.add(Dense(n_actions))
 
 print(model.summary())
@@ -96,7 +94,7 @@ def huber_loss(a, b, in_keras=True):
 		use_linear_term = K.cast(use_linear_term, 'float32')
 	return use_linear_term * linear_term + (1-use_linear_term) * quadratic_term
 
-opt = RMSprop(lr=0.001, decay=0.0000001)
+opt = RMSprop(lr=0.001)
 model.compile(loss=huber_loss, optimizer=opt)
 
 # Initialize dataset D
