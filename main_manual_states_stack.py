@@ -1,9 +1,13 @@
 import gym
+from time import time
+
 from keras.models import Sequential, model_from_json
 from keras.optimizers import RMSprop
 from keras.layers import *
 from keras import backend as K
 from keras.utils import to_categorical
+from keras.callbacks import TensorBoard
+
 from collections import deque
 from itertools import islice
 import random
@@ -11,6 +15,8 @@ import numpy as np
 from time import sleep
 env = gym.make('FishingDerby-ram-v4')
 env.seed(42)
+
+# tensorboard = TensorBoard(log_dir="logs/{}".format(time()))
 
 # mn = min, mx = max
 def rescale(v, mn, mx):
@@ -40,7 +46,6 @@ def phi(x):
 
 	# Distance to fish 4
 	xclip = 20
-	# v2 = max(line_x - xclip, 0)
 	v2 = fish2_top_x - line_x
 	v3 = fish4_top_x - line_x
 	v4 = fish6_top_x - line_x
@@ -54,7 +59,7 @@ def phi(x):
 
 	caught_fish_idx = 112
 	v0 = int(x[caught_fish_idx])
-	return np.array([v0, v1, v2, v3, v4, v5])
+	return np.array([v0, v1, v2, v3, v4])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -167,8 +172,8 @@ while True:
 
 		reward = get_reward(observation, observation_)
 
-		# if reward == 0:
-		# 	reward = -0.01
+		if reward == 0:
+			reward = -0.01
 
 		total_value += reward
 
