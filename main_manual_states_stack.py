@@ -54,7 +54,7 @@ def phi(x):
 
 	caught_fish_idx = 112
 	v0 = int(x[caught_fish_idx])
-	return np.array([v0, v1, v1_1, v2, v3, v4, v5])
+	return np.array([v0, v1, v1_1, v2, v3, v4])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -119,8 +119,8 @@ last_reward_frames = 0
 caught_fish_idx = 112
 def get_reward(obs, obs_):
 
-	if obs_[caught_fish_idx] == 0 and obs[caught_fish_idx] > 0 and obs_[pending_reward_idx] == 0:
-		return -1
+	# if obs_[caught_fish_idx] == 0 and obs[caught_fish_idx] > 0 and obs_[pending_reward_idx] == 0:
+	# 	return -1
 
 	global last_reward_frames
 	if last_reward_frames > 0:
