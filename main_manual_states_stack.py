@@ -46,14 +46,14 @@ def phi(x):
 
 	shark_x = int(x[75])
 	# shark_y = 213
-	v5 = shark_x - line_x + 10
+	v5 = max(shark_x - xclip, 0)
 
 	# v4 = shark_y - line_y
 	# v4 = np.clip([v4], -20, 20)[0]
 
 	caught_fish_idx = 112
 	v0 = int(x[caught_fish_idx])
-	return np.array([v0, v1, v2])
+	return np.array([v0, v1, v2, v5])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
