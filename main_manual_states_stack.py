@@ -30,30 +30,30 @@ def phi(x):
 	line_x = int(x[32])
 	line_y = int(x[67])
 
+	fish2_top_x = int(x[74])
 	fish4_top_x = int(x[72])
-	fish4_top_y = 245
+	fish6_top_x = int(x[70])
+	fish4_top_y = 230
+
+	v1 = max(line_y - 207, 0) # or fish4_top_y - line_y
+	# v1_1 = max(245 - line_y, 0)
 
 	# Distance to fish 4
-	v1 = line_x - fish4_top_x
-	v1 = np.clip([v1], -20, 20)[0]
-
-	v2 = fish4_top_y - line_y
-	v2 = np.clip([v2], -20, 20)[0]
-
-	fish6_top_x = int(x[70])
-	v6 = line_x - fish6_top_x
-	v6 = np.clip([v6], -20, 20)[0]
+	xclip = 24
+	v2 = max(0, fish2_top_x - xclip)
+	v3 = max(0, fish4_top_x - xclip)
+	v4 = max(0, fish6_top_x - xclip)
 
 	shark_x = int(x[75])
-	shark_y = 213
-	v3 = shark_x - line_x + 10
-	v3 = np.clip([v3], -20, 20)[0]
-	v4 = line_y - shark_y
-	v4 = np.clip([v4], -20, 20)[0]
+	# shark_y = 213
+	v5 = abs(min(20 - shark_x, 0))
+
+	# v4 = shark_y - line_y
+	# v4 = np.clip([v4], -20, 20)[0]
 
 	caught_fish_idx = 112
-	v5 = 0 if x[caught_fish_idx] == 0 else 1
-	return np.array([v1, v6, v2, v3, v4, v5])
+	v0 = int(x[caught_fish_idx])
+	return np.array([v0, v1, v2, v3, v4, v5])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -67,12 +67,13 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 2
+hist_size = 4
 
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(32, activation='relu'))
+model.add(Dense(64, activation='relu'))
+model.add(Dense(64, activation='relu'))
 model.add(Dense(n_actions))
 
 if load_model:
@@ -93,19 +94,19 @@ def huber_loss(a, b, in_keras=True):
 		use_linear_term = K.cast(use_linear_term, 'float32')
 	return use_linear_term * linear_term + (1-use_linear_term) * quadratic_term
 
-opt = RMSprop(lr=0.0001)
+opt = RMSprop(lr=0.001, decay=0.0000001)
 model.compile(loss=huber_loss, optimizer=opt)
 
 # Initialize dataset D
 D = deque(maxlen=500000)
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 100000
+e_decay_frames = 200000
 e_min = 0.1
 
 gamma = 0.95
 
-update_freq = 100
+update_freq = 32
 counter = 0
 
 min_replay_mem_size = 32
