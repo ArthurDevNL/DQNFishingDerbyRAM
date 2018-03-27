@@ -46,8 +46,8 @@ def phi(x):
 
 	# Distance to fish 4
 	xclip = 20
-	v2 = fish2_top_x - line_x
-	v2y = line_y - 217
+	# v2 = fish2_top_x - line_x
+	# v2y = line_y - 217
 	v3 = fish4_top_x - line_x
 	v3y = line_y - 230
 	v4 = fish6_top_x - line_x
@@ -61,7 +61,7 @@ def phi(x):
 
 	caught_fish_idx = 112
 	v0 = int(x[caught_fish_idx])
-	return np.array([v0, v2, v2y, v3, v3y, v4, v4y])
+	return np.array([v0, v3, v3y, v4, v4y])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -80,8 +80,8 @@ hist_size = 1
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(16))
-model.add(Dense(16))
+model.add(Dense(8))
+model.add(Dense(8))
 model.add(Dense(n_actions))
 
 print(model.summary())
@@ -175,7 +175,7 @@ while True:
 		reward = get_reward(observation, observation_)
 
 		if reward == 0:
-			reward = -0.01
+			reward = -0.1
 
 		total_value += reward
 
