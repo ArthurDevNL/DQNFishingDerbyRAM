@@ -78,15 +78,14 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 1
+hist_size = 6
 
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(256))
-model.add(Dense(256))
-model.add(Dense(256))
-model.add(Dense(256))
+model.add(Dense(128))
+model.add(Dense(128))
+model.add(Dense(128))
 model.add(Dense(n_actions))
 
 print(model.summary())
