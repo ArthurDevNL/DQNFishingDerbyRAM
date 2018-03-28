@@ -46,10 +46,10 @@ def phi(x):
 
 	# Distance to fish 4
 	xclip = 20
-	v2 = fish2_top_x - line_x
-	v2y = line_y - 217
-	v3 = fish4_top_x - line_x
-	v3y = line_y - 230
+	# v2 = fish2_top_x - line_x
+	# v2y = line_y - 217
+	# v3 = fish4_top_x - line_x
+	# v3y = line_y - 230
 	v4 = fish6_top_x - line_x
 	v4y = line_y - 245
 
@@ -62,9 +62,9 @@ def phi(x):
 	caught_fish_idx = 112
 	v0 = int(x[caught_fish_idx])
 
-	v1 = int(line_x) - 20
-	v2 = 245 - int(line_y)
-	return np.array([v0, v2, v2y, v3,v3y, v4,v4y])
+	# v1 = int(line_x) - 20
+	# v2 = 245 - int(line_y)
+	return np.array([v0, v4,v4y])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -78,14 +78,13 @@ print('State size:', state_size)
 test = False
 load_model = False
 
-hist_size = 10
+hist_size = 1
 
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(256))
-model.add(Dense(256))
-model.add(Dense(256))
+model.add(Dense(8))
+model.add(Dense(8))
 model.add(Dense(n_actions))
 
 print(model.summary())
@@ -115,7 +114,7 @@ model.compile(loss=huber_loss, optimizer=opt)
 D = deque(maxlen=500000)
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 200000
+e_decay_frames = 100000
 e_min = 0.05
 
 gamma = 0.99
@@ -126,19 +125,69 @@ counter = 0
 min_replay_mem_size = 10000
 batch_size = 32
 
+small_reward_1 = 0.0
+small_reward_2 = 0.3
+small_reward_3 = 0.8
+fish_1_y = 218
+fish_2_y = 231
+fish_3_y = 246
+
+
+penalty4 = -0.5
+penalty3 = -1
+penalty = -3
+penalty2 = -2
+too_little = int(205)
+too_little2 = int(214)
+too_little3 = int(229)
+too_little4 = int(245)
+
+
+too_much = int(247) #if we pass the 5th line, where we can get fish, to avoid gooing too far
+go_after = int(230)
+
+small_reward = 0.5
+min_random_episodes = 10
 pending_reward_idx = 114
 last_reward_frames = 0
 caught_fish_idx = 112
 def get_reward(obs, obs_):
 
+	# Shark eats fish
 	# if obs_[caught_fish_idx] == 0 and obs[caught_fish_idx] > 0 and obs_[pending_reward_idx] == 0:
-	# 	return -1
+	#     return -0.5
+
+	# if obs_[67] > too_much:
+	#     return penalty
+
+	if obs_[67] == fish_1_y:
+		return small_reward_1
+	if obs_[67] == fish_2_y:
+		return small_reward_2
+	if obs_[67] == fish_3_y:
+		return small_reward_3
+
+	if obs_[67] < too_little:
+		return penalty
+
+	if obs_[67] < too_little2:
+		return penalty2
+
+	if obs_[67] < too_little3:
+		return penalty3
+
+	if obs_[67] < too_little4:
+		return penalty4
+
+	if obs_[67] > go_after:
+		return small_reward
 
 	global last_reward_frames
 	if last_reward_frames > 0:
 		last_reward_frames -= 1
 		return 0
 
+	# Only give reward if fish with value 4 is caught
 	pending_reward = obs_[pending_reward_idx]
 	if pending_reward > 0:
 		last_reward_frames = pending_reward + 1
