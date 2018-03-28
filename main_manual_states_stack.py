@@ -31,40 +31,37 @@ def one_hot(x, mn, mx, num_classes=20):
 
 def phi(x):
 
-	features = []
+    features = []
 
-	line_x = int(x[32])
-	line_y = int(x[67])
+    line_x = int(x[32])
+    line_y = int(x[67])
 
-	fish2_top_x = int(x[74])
-	fish4_top_x = int(x[72])
-	fish6_top_x = int(x[70])
+    fish2_top_x = int(x[74])
+    fish2_top_y = 217 #line 1st fish
 
-	# v1 = max(line_y - 207, 0) # or
-	# v1 = 245 - line_y
-	# v1_1 = 245 - line_y
+    # Distance to fish 4
+    v1 = fish2_top_x - line_x
+    v1 = np.clip([v1], -10, 10)[0]
+    v2 = fish2_top_y - line_y
+    v2 = np.clip([v2], -10, 10)[0]
 
-	# Distance to fish 4
-	xclip = 20
-	v2 = fish2_top_x - 20
-	# v2y = line_y - 217
-	v3 = fish4_top_x - 20
-	# v3y = line_y - 230
-	v4 = fish6_top_x - 20
-	# v4y = line_y - 245
+    fish6_x = int(x[72])
+    fish6_y = 230
 
-	shark_x = int(x[75])
-	# shark_y = 213
-	# v5 = shark_x - line_x + 5
-	# v4 = shark_y - line_y
-	# v4 = np.clip([v4], -20, 20)[0]
+    fish8_y = 245
+    # features.append(fish6_x - line_x)
+    # features.append(fish6_y - line_y)
 
-	caught_fish_idx = 112
-	v0 = int(x[caught_fish_idx])
+    shark_x = int(x[75])
+    shark_y = 213
+    v3 = shark_x - line_x + 10
+    v3 = np.clip([v3], -15, 15)[0]
+    v4 = shark_y - line_y
+    v4 = np.clip([v4], -15, 15)[0]
 
-	# v1 = int(line_x) - 20
-	# v2 = 245 - int(line_y)
-	return np.array([v0, v2, v3, v4])
+    caught_fish_idx = 112
+    v5 = 0 if x[caught_fish_idx] == 0 else 1
+    return np.array([v1, v2, v3, v4, v5])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -114,7 +111,7 @@ model.compile(loss=huber_loss, optimizer=opt)
 D = deque(maxlen=500000)
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 100000
+e_decay_frames = 200000
 e_min = 0.05
 
 gamma = 0.99
