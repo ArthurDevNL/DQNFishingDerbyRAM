@@ -64,7 +64,7 @@ def phi(x):
 
 	v1 = int(line_x) - 20
 	v2 = 245 - int(line_y)
-	return np.array([v0, v1, v2])
+	return np.array([v0, v1, v2, fish2_top_x, fish4_top_x, fish6_top_x])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -119,7 +119,7 @@ e_min = 0.05
 
 gamma = 0.99
 
-update_freq = 64
+update_freq = 32
 counter = 0
 
 min_replay_mem_size = 10000
