@@ -46,12 +46,12 @@ def phi(x):
 
 	# Distance to fish 4
 	xclip = 20
-	# v2 = fish2_top_x - line_x
-	# v2y = line_y - 217
-	# v3 = fish4_top_x - line_x
-	# v3y = line_y - 230
-	# v4 = fish6_top_x - line_x
-	# v4y = line_y - 245
+	v2 = fish2_top_x - line_x
+	v2y = line_y - 217
+	v3 = fish4_top_x - line_x
+	v3y = line_y - 230
+	v4 = fish6_top_x - line_x
+	v4y = line_y - 245
 
 	shark_x = int(x[75])
 	# shark_y = 213
@@ -64,7 +64,7 @@ def phi(x):
 
 	v1 = int(line_x) - 20
 	v2 = 245 - int(line_y)
-	return np.array([v0, v1, v2, fish2_top_x, fish4_top_x, fish6_top_x])
+	return np.array([v0, v1, v2, fish2_top_x, fish4_top_x, fish6_top_x, v2, v2y, v3,v3y, v4,v4y])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -83,8 +83,8 @@ hist_size = 10
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(256))
-model.add(Dense(256))
+model.add(Dense(512))
+model.add(Dense(512))
 model.add(Dense(n_actions))
 
 print(model.summary())
@@ -114,7 +114,7 @@ model.compile(loss=huber_loss, optimizer=opt)
 D = deque(maxlen=500000)
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 100000
+e_decay_frames = 200000
 e_min = 0.05
 
 gamma = 0.99
