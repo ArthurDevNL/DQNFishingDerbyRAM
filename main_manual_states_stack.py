@@ -64,7 +64,7 @@ def phi(x):
 
 	v1 = int(line_x) - 20
 	v2 = 245 - int(line_y)
-	return np.array([v0, v1, v2, fish2_top_x, fish4_top_x, fish6_top_x, v2, v2y, v3,v3y, v4,v4y])
+	return np.array([v0, v2, v2y, v3,v3y, v4,v4y])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
@@ -83,8 +83,9 @@ hist_size = 10
 # Initialize value function
 model = Sequential()
 model.add(Flatten(input_shape=(state_size, hist_size)))
-model.add(Dense(512))
-model.add(Dense(512))
+model.add(Dense(256))
+model.add(Dense(256))
+model.add(Dense(256))
 model.add(Dense(n_actions))
 
 print(model.summary())
@@ -153,7 +154,7 @@ while True:
 	total_value = 0
 	done = False
 	while not done:
-		env.render()
+		#env.render()
 
 		state = phi(observation)
 
