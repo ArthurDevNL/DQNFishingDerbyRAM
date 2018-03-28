@@ -128,19 +128,11 @@ small_reward_3 = 0.8
 fish_1_y = 218
 fish_2_y = 231
 fish_3_y = 246
-
-
-penalty4 = -0.5
-penalty3 = -1
-penalty = -3
-penalty2 = -2
+penalty = -1
+penalty2 = -0.5
+too_much = int(247) #if we pass the 5th line, where we can get fish, to avoid gooing too far
 too_little = int(205)
 too_little2 = int(214)
-too_little3 = int(229)
-too_little4 = int(245)
-
-
-too_much = int(247) #if we pass the 5th line, where we can get fish, to avoid gooing too far
 go_after = int(230)
 
 small_reward = 0.5
@@ -150,47 +142,41 @@ last_reward_frames = 0
 caught_fish_idx = 112
 def get_reward(obs, obs_):
 
-	# Shark eats fish
-	# if obs_[caught_fish_idx] == 0 and obs[caught_fish_idx] > 0 and obs_[pending_reward_idx] == 0:
-	#     return -0.5
+    # Shark eats fish
+    # if obs_[caught_fish_idx] == 0 and obs[caught_fish_idx] > 0 and obs_[pending_reward_idx] == 0:
+    #     return -0.5
 
-	# if obs_[67] > too_much:
-	#     return penalty
+    # if obs_[67] > too_much:
+    #     return penalty
 
-	if obs_[67] == fish_1_y:
-		return small_reward_1
-	if obs_[67] == fish_2_y:
-		return small_reward_2
-	if obs_[67] == fish_3_y:
-		return small_reward_3
+    if obs_[67] == fish_1_y:
+        return small_reward_1
+    if obs_[67] == fish_2_y:
+        return small_reward_2
+    if obs_[67] == fish_3_y:
+        return small_reward_3
 
-	if obs_[67] < too_little:
-		return penalty
+    if obs_[67] < too_little:
+        return penalty
 
-	if obs_[67] < too_little2:
-		return penalty2
+    if obs_[67] < too_little2:
+        return penalty2
 
-	if obs_[67] < too_little3:
-		return penalty3
+    if obs_[67] > go_after:
+        return small_reward
 
-	if obs_[67] < too_little4:
-		return penalty4
+    global last_reward_frames
+    if last_reward_frames > 0:
+        last_reward_frames -= 1
+        return 0
 
-	if obs_[67] > go_after:
-		return small_reward
+    # Only give reward if fish with value 4 is caught
+    pending_reward = obs_[pending_reward_idx]
+    if pending_reward > 0:
+        last_reward_frames = pending_reward + 1
+        return pending_reward + 1
 
-	global last_reward_frames
-	if last_reward_frames > 0:
-		last_reward_frames -= 1
-		return 0
-
-	# Only give reward if fish with value 4 is caught
-	pending_reward = obs_[pending_reward_idx]
-	if pending_reward > 0:
-		last_reward_frames = pending_reward + 1
-		return pending_reward + 1
-
-	return 0
+    return 0
 
 episode = 0
 while True:
