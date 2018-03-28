@@ -128,15 +128,21 @@ small_reward_3 = 0.8
 fish_1_y = 218
 fish_2_y = 231
 fish_3_y = 246
-penalty = -1
-penalty2 = -0.5
+
 too_much = int(247) #if we pass the 5th line, where we can get fish, to avoid gooing too far
-too_little = int(205)
-too_little2 = int(214)
 go_after = int(230)
 
+penalty4 = -0.5
+penalty3 = -1
+penalty = -4
+penalty2 = -3
+too_little = int(205)
+too_little2 = int(214)
+too_little3 = int(229)
+too_little4 = int(245)
+
 small_reward = 0.5
-min_random_episodes = 10
+min_random_episodes = 3
 pending_reward_idx = 114
 last_reward_frames = 0
 caught_fish_idx = 112
@@ -161,6 +167,13 @@ def get_reward(obs, obs_):
 
     if obs_[67] < too_little2:
         return penalty2
+
+    if obs_[67] < too_little3:
+        return penalty3
+
+    if obs_[67] < too_little4:
+        return penalty4
+
 
     if obs_[67] > go_after:
         return small_reward
