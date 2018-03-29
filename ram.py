@@ -63,6 +63,7 @@ last_b = False
 had_fish = False
 
 i = 0
+
 while True:
 	env.render()
 
@@ -70,34 +71,22 @@ while True:
 
 	action = env.action_space.sample()
 	# action = 3
-	observation, reward, done, info = env.step(action)
+	observation_, reward, done, info = env.step(action)
 	clear()
 
 	r = np.subtract(observation, observation_)
 	print_ram(r)
-	print(observation[114]) #114
-	print(observation[112])
+	print(observation[115]) #114
 	print_ram(observation)
 
 	# plt.imshow(observation)
 	# plt.grid(True)
 	# plt.savefig('test')
 
-	# if observation_[caught_fish_idx] > 0 and observation[caught_fish_idx] == 0 and observation[pending_reward_idx] == 0:
+	# if observation_[caught_fish_idx] == 0 and observation[caught_fish_idx] > 0 and observation_[pending_reward_idx] == 0:
 	# 	print("RAAwwrrrr miam")
-	# 	input()
+	input()
 
-	# if observation_[65] > 0:
-	# 	input()
-
-	if observation[114] > 0:
-		input()
-	# if observation[caught_fish_idx]
-
-	# if observation[caught_fish_idx] > 0 or last_b:
-	# 	input()
-	# 	last_b = True
-
-	observation_ = observation
+	observation = observation_
 
 env.close()

@@ -180,7 +180,7 @@ while True:
 		reward = get_reward(observation, observation_)
 
 		if reward == 0:
-			reward = -0.01
+			reward = -0.02
 
 		total_value += reward
 

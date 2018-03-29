@@ -16,66 +16,34 @@ from time import sleep
 env = gym.make('FishingDerby-ram-v4')
 env.seed(42)
 
-# tensorboard = TensorBoard(log_dir="logs/{}".format(time()))
-
-# mn = min, mx = max
-def rescale(v, mn, mx):
-	v = min(v - mn, mx - mn)
-	return float(v / (mx - mn))
-
-def one_hot(x, mn, mx, num_classes=20):
-	x = max(x - mn, 0)
-	x = min(x, mx - mn)
-	x = int(round(x/num_classes))
-	return to_categorical(x, num_classes=num_classes)
-
 def phi(x):
 
-    features = []
+	line_x = int(x[32])
+	line_y = int(x[67])
 
-    line_x = int(x[32])
-    line_y = int(x[67])
+	fish6_x = int(x[70])
+	fish6_y = 245
 
-    fish2_top_x = int(x[74])
-    fish2_top_y = 217 #line 1st fish
+	v1 = line_x - fish6_x
+	v2 = fish6_y - line_y
 
-    # Distance to fish 4
-    v1 = fish2_top_x - line_x
-    v1 = np.clip([v1], -10, 10)[0]
-    v2 = fish2_top_y - line_y
-    v2 = np.clip([v2], -10, 10)[0]
+	v5 = 0 if x[113] == 0 else 1
+	return np.array([v1, v2, v5])
 
-    fish6_x = int(x[72])
-    fish6_y = 230
-
-    fish8_y = 245
-    # features.append(fish6_x - line_x)
-    # features.append(fish6_y - line_y)
-
-    shark_x = int(x[75])
-    shark_y = 213
-    v3 = shark_x - line_x + 10
-    v3 = np.clip([v3], -15, 15)[0]
-    v4 = shark_y - line_y
-    v4 = np.clip([v4], -15, 15)[0]
-
-    caught_fish_idx = 112
-    v5 = 0 if x[caught_fish_idx] == 0 else 1
-    return np.array([v1, v2, v3, v4, v5])
 
 observation = env.reset()
 state_size = phi(observation).shape[0]
 
-actions = [2,3,4,5]
-n_actions = 4 #env.action_space.n
+actions = [0,2,3,4,5]
+n_actions = 5 #env.action_space.n
 
 print(env.unwrapped.get_action_meanings())
 print('State size:', state_size)
 
 test = False
-load_model = False
+load_model = True
 
-hist_size = 4
+hist_size = 1
 
 # Initialize value function
 model = Sequential()
@@ -111,7 +79,7 @@ model.compile(loss=huber_loss, optimizer=opt)
 D = deque(maxlen=500000)
 
 e = 1.0 if not test else 0.05
-e_decay_frames = 200000
+e_decay_frames = 100000
 e_min = 0.05
 
 gamma = 0.99
@@ -122,74 +90,23 @@ counter = 0
 min_replay_mem_size = 10000
 batch_size = 32
 
-small_reward_1 = 0.0
-small_reward_2 = 0.3
-small_reward_3 = 0.8
-fish_1_y = 218
-fish_2_y = 231
-fish_3_y = 246
-
-too_much = int(247) #if we pass the 5th line, where we can get fish, to avoid gooing too far
-go_after = int(230)
-
-penalty4 = -0.5
-penalty3 = -1
-penalty = -4
-penalty2 = -3
-too_little = int(205)
-too_little2 = int(214)
-too_little3 = int(229)
-too_little4 = int(245)
-
-small_reward = 0.5
-min_random_episodes = 3
-pending_reward_idx = 114
+pending_reward_idx = 115
 last_reward_frames = 0
-caught_fish_idx = 112
+caught_fish_idx = 113
 def get_reward(obs, obs_):
 
-    # Shark eats fish
-    # if obs_[caught_fish_idx] == 0 and obs[caught_fish_idx] > 0 and obs_[pending_reward_idx] == 0:
-    #     return -0.5
+	global last_reward_frames
+	if last_reward_frames > 0:
+		last_reward_frames -= 1
+		return 0
 
-    # if obs_[67] > too_much:
-    #     return penalty
+	# Only give reward if fish with value 4 is caught
+	pending_reward = obs_[pending_reward_idx]
+	if pending_reward > 0:
+		last_reward_frames = pending_reward + 1
+		return pending_reward + 1
 
-    if obs_[67] == fish_1_y:
-        return small_reward_1
-    if obs_[67] == fish_2_y:
-        return small_reward_2
-    if obs_[67] == fish_3_y:
-        return small_reward_3
-
-    if obs_[67] < too_little:
-        return penalty
-
-    if obs_[67] < too_little2:
-        return penalty2
-
-    if obs_[67] < too_little3:
-        return penalty3
-
-    if obs_[67] < too_little4:
-        return penalty4
-
-
-    if obs_[67] > go_after:
-        return small_reward
-
-    global last_reward_frames
-    if last_reward_frames > 0:
-        last_reward_frames -= 1
-        return 0
-
-    # Only give reward if fish with value 4 is caught
-    pending_reward = obs_[pending_reward_idx]
-    if pending_reward > 0:
-        last_reward_frames = pending_reward + 1
-        return pending_reward + 1
-
-    return 0
+	return 0
 
 episode = 0
 while True:
@@ -206,7 +123,7 @@ while True:
 		# Take a random action fraction e (epsilon) of the time
 		action = None
 		if np.random.rand() < e or counter < hist_size:
-			action = np.random.choice(range(n_actions), p=[0.26,0.23,0.23,0.28])
+			action = np.random.choice(range(n_actions), p=[0.05, 0.24,0.22,0.22,0.27])
 			# action = np.random.choice(range(n_actions), p=[0.48,0.52])
 			# action = np.random.choice(range(n_actions))
 		else:
@@ -225,7 +142,7 @@ while True:
 		reward = get_reward(observation, observation_)
 
 		if reward == 0:
-			reward = -0.02
+			reward = -0.0001
 
 		total_value += reward
 
@@ -276,11 +193,11 @@ while True:
 
 	print('Finished episode', episode, total_catch_value, total_value, counter, e)
 
-	if episode % 20 == 0 and not test:
-		model_json = model.to_json()
-		with open("model.json", "w") as json_file:
-			json_file.write(model_json)
-		model.save_weights("model.h5")
+	# if episode % 20 == 0 and not test:
+	# 	model_json = model.to_json()
+	# 	with open("model.json", "w") as json_file:
+	# 		json_file.write(model_json)
+	# 	model.save_weights("model.h5")
 
 	episode += 1
 
